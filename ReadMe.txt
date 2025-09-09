@@ -1,4 +1,4 @@
-Development Log
+                                                                                          Development Log
 Team
 Day 1: Distribution of tasks
 We started by distributing the tasks to every team member. Eduardo was going to make one map window, Aemi the other map window, Andrea the recommendations window and Jetzuvely the main window.
@@ -49,3 +49,57 @@ Personal work reflection
 I'm working on a new idea in a different style because I prefer and love design more, that's why I opt for a 3D style, I do this style with a video tutorial and look for information about things that I considered very important not only for this project but in general because I decided to add the stories and partners and educational videos. I did it with div and img, one scrip for java for the scroll in the website, videos and some classes for the design and more efficiently, for example, the title class is very comfortable because it is reusable for some parts of the project. My part was the main page and the first page to start, at the beginning they were very difficult because in the css I want something newer and more interactive and for this I used a combination of tools fonts and sizes colors and more the html is easier because it is more information and classes, the real challenge for me is in the css. (I started on the weekend and finished my part on Monday, the first day I started with the html the skeleton of the website and then defined the look and found it in the css design)
 Team work reflection
 I think my team's work is incredible. Each person contributes different and important things and good ideas to the design. The name and images are very beautiful. My entire team works together perfectly, they are very punctual and communicate well, the codes are very good.
+
+                                                                                                     Use of AI report
+
+Date: 09/09/2025
+Project/Module: Project Prototype
+
+Goals for the documented section:
+
+We planned to ensure that our project would be both functional and visually attractive. Our goal was to have a clear vision of how our website would look by adding buttons, images, and some of the most important information. We also wanted the design to be engaging, so that the users could easily navigate and understand the content.
+
+Task completed:
+
+We worked on the prototype by using essential elements to build the structure of our website. However, we had some problems and challenges during the development process. At first, we didn't understand how to properly use Bootstrap, especially when it came to making specific changes we wanted, like adjusting the position of some elements, for example, moving the map more to the left. Also, we were unsure how to share and collaborate through a GitHub repository. Despite these challenges, we solve the problems by searching for solutions on the internet, using AI tools, and helping each other. 
+
+Use of Gen AI:
+
+Prompt: “What is the Bootstrap Grid System?”
+Output: “El Bootstrap Grid System (sistema de cuadrícula de Bootstrap) es la forma en que Bootstrap organiza y acomoda los elementos en una página web.
+👉 Básicamente es una rejilla (grid) que divide el espacio de la pantalla en 12 columnas.
+ Con esas columnas puedes decidir qué tanto espacio ocupa cada elemento y cómo se distribuyen en distintos tamaños de pantalla (computadora, tablet, celular).”
+Its advantages are that its grid system automatically adjusts layout for different devices and screen sizes without extra effort. It also ensures your website looks clean and consistent across different browsers. And you can override Bootstrap's default styles with your own css, or even download custom builds with only the features you need.”
+Edits: Added more columns and rows, commented the code so that the line can be more understandable. The output gave specific padding and margin, but we also changed the methods. It was only used as a layout to start the bootstrap grid system.
+Reflections:
+We learnt that you can put a pre-established background, that it helps us to not have to use CSS from 0, the classes make it easier to establish padding and margin, and it gives structure to the webpage.
+
+Prompt: “Why is my image on the wrong side?”
+Output: “El problema no está en la imagen en sí, sino en la estructura del grid de Bootstrap.”
+Edits: We read the solution that AI was giving us and modified it on our code while manipulating it to find out how it affects the functions.
+Reflections: We were having problems with the positioning of the elements because, although we were writing on the code that we wanted some element in some place, the element wasn’t doing what we expected. After looking for the problem in the code and not succeeding, we asked ChatGPT and helped us with the problem. We learnt that if an image has absolute position, bootstrap won’t recognize it.
+
+Resources:
+Bootstrap web page: https://getbootstrap.com/ 
+Blackboard Presentations
+Youtube tutorials
+
+What we learned:
+
+We learnt how to use the bootstrap grid system regarding the general structure of the page, how to use the bootstrap system to make sections that appear as something very relevant, and how to make headers and footers. Bootstrap is a very efficient system because it is very easy to add classes that would be a little more complicated to modify with CSS. Also, it brings the possibility to make layouts faster than making them from scratch with CSS.
+
+Challenges and bugs:
+
+The biggest challenges we faced were when we couldn’t accommodate things as we wanted because, no matter how much we changed the code, the element didn't behave as expected. But, with AI tools, we were able to find the problem, understand it and find solutions. It is easier to solve a problem when you know what the problem is. Also, we had problems remembering how to write some lines of code, but we managed to do it by checking the presentations.
+
+Next steps:
+
+After this delivery we can write mistakes that we make and how we solved them, but in a very specific way, so that we can have a “dictionary of resources” and start remembering how to solve the problems in future occasions. In that way, we will be able to rely less and less on AI to find bugs.
+
+Reflection:
+
+As a team, we believe that our collaboration was very good. Each member contributed in different ways, whether through research, coding, design, or problem-solving, which allowed us to combine our skills and complete our objective of this delivery.
+
+One of the most important lessons we learned as a team is that communication is essential. By constantly sharing progress, doubts, and ideas, we were able to stay organized. We also realized the value of patience, since not everything worked as we expected at first, and we needed to act quickly.
+
+This delivery of the prototype helped us to learn and strengthen our skills of HTML and CSS, while also giving us the opportunity to check, share, and validate our research among team members. 
