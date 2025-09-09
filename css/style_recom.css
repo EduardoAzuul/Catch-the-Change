@@ -61,7 +61,7 @@
     overflow: hidden;
 }
 
-/* Hero background media - CRITICAL for scroll fade */
+/* Hero background media - NEEDED FOR SCROLL FADE */
 .hero-media {
     position: absolute;
     inset: 0;
@@ -110,65 +110,72 @@
    MAIN CONTENT STYLES
    ================================= */
 
+body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    background-color: white;
+    color: var(--azul-oscuro);
+    text-align: justify;
+}
 
+.texto{
+    text-align: justify;
+    padding: 20px;
+}
 
-    .texto{
-        text-align: justify;
-        padding: 20px;
-    }
+h1{
 
-    h1{
+    font-family: 'Sacramento',sans-serif;
+    color: #03045e;
+    font-size:50px;
+}
 
-        font-family: 'Sacramento',sans-serif;
-        color: #03045e;
-        font-size:50px;
-    }
+h2{
+    color:#0077b6;
+    font-size:25px;
+}
 
-    h2{
-        color:#0077b6;
-        font-size:25px;
-    }
+p, ul{
 
-    p, ul{
-
-        color: #03045e;
-       
-
-    }
-
-    .ul_contact{
-
-        list-style-type: none;
-        margin-left: 0;
-    }
-
-    .rectangle{
-        background: linear-gradient(white,#b9eff9);
-        border-radius: 10px;
-        padding: 10px;
-        width: 70%;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-        margin-top: 10px;
-        margin-bottom: 20px;
-        display: flex;
+    color: #03045e;
     
-    }
+
+}
+
+.ul_contact{
+
+    list-style-type: none;
+    margin-left: 0;
+}
+
+.rectangle{
+    background: linear-gradient(white,#b9eff9);
+    border-radius: 10px;
+    padding: 10px;
+    width: 70%;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+    margin-top: 10px;
+    margin-bottom: 20px;
+    display: flex;
+
+}
 
 
-    .contact, .forms{
-        align-items: center;
-        padding: 20px;
-        width: 50%;
-    }
+.contact, .forms{
+    align-items: center;
+    padding: 20px;
+    width: 50%;
+}
 
-    .government1, .government2, .ORG1, .ORG2{
-        width: 45%;
-        height: 150px;
-        border-radius: 10px;
-        display: inline-block;
-        margin-right: 5px;
-        background-color: #0077b6;
-    }
+.government1, .government2, .ORG1, .ORG2{
+    width: 45%;
+    height: 150px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-right: 5px;
+    background-color: #0077b6;
+}
     
 
 /* =================================
