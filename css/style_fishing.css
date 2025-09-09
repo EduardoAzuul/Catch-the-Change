@@ -61,7 +61,7 @@
     overflow: hidden;
 }
 
-/* Hero background media - CRITICAL for scroll fade */
+/* Hero background media - NEEDED FOR SCROLL FADE */
 .hero-media {
     position: absolute;
     inset: 0;

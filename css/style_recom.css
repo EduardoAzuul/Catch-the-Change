@@ -22,6 +22,10 @@
     height: 44px;
 }
 
+.Logo-img {
+    height: 44px;
+}
+
 .brand-title {
     font-family: 'Sacramento', cursive;
     color: #ffffff;
@@ -110,14 +114,7 @@
    MAIN CONTENT STYLES
    ================================= */
 
-body {
-    margin: 0;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 18px;
-    background-color: white;
-    color: var(--azul-oscuro);
-    text-align: justify;
-}
+
 
 .texto{
     text-align: justify;
