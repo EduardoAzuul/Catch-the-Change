@@ -38,6 +38,11 @@ app.get("/recommendations", (req, res) => {
     res.render("recommendations"); // renders recommendations.ejs
 });
 
+// Route for map page
+app.get("/map", (req, res) => {
+    res.render("map"); // renders map.ejs
+});
+
 // --- Start the Server ---
 const PORT = 3000;
 app.listen(PORT, () => {
