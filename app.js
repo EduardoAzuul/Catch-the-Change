@@ -4,14 +4,15 @@ const bodyParser = require("body-parser");
 const axios = require("axios");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 
 const app = express();
 
 app.use(cors());
-app.use(express.static(__dirname)); // permite acceder a css/, js/, etc.
+app.use(express.static(__dirname)); // alows access to css/, js/, etc.
 
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views")); // asegúrate que tus .ejs estén en /views
+app.set("views", path.join(__dirname, "views")); 
 
 // INDEX ROUTE (/): Displays the complete gallery or a character's detail
 app.get("/", async (req, res) => {
@@ -25,7 +26,28 @@ app.get("/main", (req, res) => {
 
 // Route for fishing_activity page
 app.get("/fishing_activity", (req, res) => {
-    res.render("fishing_activity"); // renders fishing_activity.ejs
+    try {
+        // Read the GeoJSON files
+        const economicZone = JSON.parse(
+            fs.readFileSync(path.join(__dirname, 'data', 'MexicoEconomicZone.geojson'), 'utf8')
+        );
+        const protectedAreas1 = JSON.parse(
+            fs.readFileSync(path.join(__dirname, 'data', 'ProtectedAreas.geojson'), 'utf8')
+        );
+        const protectedAreas2 = JSON.parse(
+            fs.readFileSync(path.join(__dirname, 'data', 'ProtectedAreas2.geojson'), 'utf8')
+        );
+        
+        // Pass the data to fishing_activity.ejs
+        res.render("fishing_activity", {
+            economicZone: JSON.stringify(economicZone),
+            protectedAreas1: JSON.stringify(protectedAreas1),
+            protectedAreas2: JSON.stringify(protectedAreas2)
+        });
+    } catch (error) {
+        console.error('Error loading GeoJSON files:', error);
+        res.status(500).send('Error loading map data');
+    }
 });
 
 // Route for endangered_species page
@@ -38,10 +60,6 @@ app.get("/recommendations", (req, res) => {
     res.render("recommendations"); // renders recommendations.ejs
 });
 
-// Route for map page
-app.get("/map", (req, res) => {
-    res.render("map"); // renders map.ejs
-});
 
 // --- Start the Server ---
 const PORT = 3000;

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map with Protected Areas</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        #map {
+            height: 600px;
+            width: 80%;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Mexico Economic Zone and Protected Areas</h2>
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Parse the GeoJSON data passed from the server
+        const economicZoneData = <%- economicZone %>;
+        const protectedAreas1Data = <%- protectedAreas1 %>;
+        const protectedAreas2Data = <%- protectedAreas2 %>;
+        
+        console.log('Economic Zone loaded:', economicZoneData);
+        console.log('Protected Areas 1 loaded:', protectedAreas1Data);
+        console.log('Protected Areas 2 loaded:', protectedAreas2Data);
+        
+        // Initialize the map
+        const map = L.map('map').setView([23.6345, -102.5528], 5); // Centered on Mexico
+        
+        // Add base tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Add Mexico Economic Zone layer
+        const economicZoneLayer = L.geoJSON(economicZoneData, {
+            style: {
+                color: '#3388ff',
+                weight: 2,
+                fillOpacity: 0.2,
+                fillColor: '#3388ff'
+            },
+            onEachFeature: function(feature, layer) {
+                let popupContent = '<strong>Mexico Economic Zone</strong><br>';
+                if (feature.properties) {
+                    for (let prop in feature.properties) {
+                        popupContent += `${prop}: ${feature.properties[prop]}<br>`;
+                    }
+                }
+                layer.bindPopup(popupContent);
+            }
+        }).addTo(map);
+        
+        // Add Protected Areas 1 layer
+        const protectedAreas1Layer = L.geoJSON(protectedAreas1Data, {
+            style: {
+                color: '#00ff00',
+                weight: 2,
+                fillOpacity: 0.4,
+                fillColor: '#00ff00'
+            },
+            onEachFeature: function(feature, layer) {
+                let popupContent = '<strong>Protected Area</strong><br>';
+                if (feature.properties) {
+                    for (let prop in feature.properties) {
+                        popupContent += `${prop}: ${feature.properties[prop]}<br>`;
+                    }
+                }
+                layer.bindPopup(popupContent);
+            }
+        }).addTo(map);
+        
+        // Add Protected Areas 2 layer
+        const protectedAreas2Layer = L.geoJSON(protectedAreas2Data, {
+            style: {
+                color: '#ff6600',
+                weight: 2,
+                fillOpacity: 0.4,
+                fillColor: '#ff6600'
+            },
+            onEachFeature: function(feature, layer) {
+                let popupContent = '<strong>Protected Area 2</strong><br>';
+                if (feature.properties) {
+                    for (let prop in feature.properties) {
+                        popupContent += `${prop}: ${feature.properties[prop]}<br>`;
+                    }
+                }
+                layer.bindPopup(popupContent);
+            }
+        }).addTo(map);
+        
+        // Add legend
+        const legend = L.control({position: 'bottomright'});
+        legend.onAdd = function(map) {
+            const div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = `
+                <h4>Map Layers</h4>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #3388ff; display: inline-block; width: 20px; height: 20px; margin-right: 5px; border: 1px solid #000;"></span>
+                    Economic Zone
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #00ff00; display: inline-block; width: 20px; height: 20px; margin-right: 5px; border: 1px solid #000;"></span>
+                    Protected Areas 1
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: #ff6600; display: inline-block; width: 20px; height: 20px; margin-right: 5px; border: 1px solid #000;"></span>
+                    Protected Areas 2
+                </div>
+            `;
+            return div;
+        };
+        legend.addTo(map);
+        
+        // Layer control to toggle visibility
+        const overlays = {
+            "Mexico Economic Zone": economicZoneLayer,
+            "Protected Areas 1": protectedAreas1Layer,
+            "Protected Areas 2": protectedAreas2Layer
+        };
+        L.control.layers(null, overlays).addTo(map);
+        
+        // Fit map to show all layers
+        const allLayers = L.featureGroup([
+            economicZoneLayer,
+            protectedAreas1Layer,
+            protectedAreas2Layer
+        ]);
+        map.fitBounds(allLayers.getBounds());
+    </script>
+</body>
+</html>
