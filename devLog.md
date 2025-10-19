@@ -1,5 +1,5 @@
 Date: 18/10/25
-
+José Eduardo Moreno Paredes
 Project / Module: Catch the Change - Web Development
 
 Goals for the documented session
