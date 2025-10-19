@@ -51,8 +51,15 @@ app.get("/fishing_activity", (req, res) => {
 });
 
 // Route for endangered_species page
-app.get("/endangered_species", (req, res) => {
-    res.render("endangered_species"); // renders endangered_species.ejs
+app.get("/endangered_species", (req, res) => { 
+    // Read the JSON files
+        const mexicomap = JSON.parse(
+            fs.readFileSync(path.join(__dirname, 'data', 'iucnredlist-mexico-data.json'), 'utf8')
+        );
+
+    res.render("endangered_species", {
+        mexicomap: JSON.stringify(mexicomap)
+    }); // renders endangered_species.ejs
 });
 
 // Route for recommendations page
