@@ -13,3 +13,5 @@ HTML to EJS Conversion: Helped detect and correct errors when converting static 
 Route Implementation: Assisted in completing the necessary routes in app.js for proper page navigation and functionality.
 
 Project Initialization: Suggested and documented the required commands for setting up and running the project efficiently.
+
+Allowing to contact us: Assited in allowing the forms to send gmails to us. It guide us step by s tep to achieve it.

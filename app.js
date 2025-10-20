@@ -5,11 +5,14 @@ const axios = require("axios");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
-
+const nodemailer = require('nodemailer');//import nodemailer library to send forms (send mail through Gmail SMTP)
+const submissionsPath = path.join(__dirname, 'data', 'submission.json');
 const app = express();
 
 app.use(cors());
-app.use(express.static(__dirname)); // alows access to css/, js/, etc.
+app.use(express.static(__dirname)); // allows access to css/, js/, etc.
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views")); 
@@ -67,6 +70,56 @@ app.get("/recommendations", (req, res) => {
     res.render("recommendations"); // renders recommendations.ejs
 });
 
+//sending an email
+app.post('/send', async (req, res) => {
+  const { name, email, subject, message } = req.body;
+
+  try {
+
+    let testAccount = await nodemailer.createTestAccount(); //creates a test account
+
+    let transporter = nodemailer.createTransport({ //sets up a connection to the fake SMTP server
+      host: 'smtp.ethereal.email',
+      port: 587,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass
+      }
+    });
+
+    let info = await transporter.sendMail({ //sends the email
+        from: `"${name}" <${email}>`,
+      to: testAccount.user,
+      subject: subject,
+      text: `Message:\n${message}`
+    });
+
+     //saves submission into json file
+    let submissions = [];
+
+    if (fs.existsSync(submissionsPath)) {
+      submissions = JSON.parse(fs.readFileSync(submissionsPath, 'utf8'));
+    }
+
+      submissions.push({
+      name,
+      email,
+      subject,
+      message,
+      date: new Date(),
+      previewUrl: nodemailer.getTestMessageUrl(info)
+    });
+
+    fs.writeFileSync(submissionsPath, JSON.stringify(submissions, null, 2));
+
+     // Sends a confirmation message
+    res.status(200).send(`✅ Email sent! Preview it here: ${nodemailer.getTestMessageUrl(info)}`);
+
+      } catch (err) { //if the mail wasn't sent...
+    console.error('Error sending email:', err);//sends a message that there was an error
+    res.status(500).send('❌ Failed to send email.');
+  }
+});
 
 // --- Start the Server ---
 const PORT = 3000;

@@ -111,15 +111,15 @@
                     </div>
 
                     <div>
-                        <form class="forms">
+                        <form class="forms" id="contactForm" action="/send" method="POST">
                             <label for="name">Name:</label><br>
-                            <input type="text" id="name" name="name"><br>
+                            <input type="text" id="name" name="name" required><br> 
                             <label for="email">Email:</label><br>
-                            <input type="email" id="email" email="email"><br>
+                            <input type="email" id="email" name="email" required><br>
                             <label for="subject">Subject:</label><br>
-                            <input type="text" id="subject" subject="subject""><br> <br>
-                            <textarea name="message" rows="10" cols="30"> Message </textarea><br> 
-                            <input type="submit" value="Submit Form">
+                            <input type="text" id="subject" name="subject" required><br> <br>
+                            <textarea name="message" id= "message" rows="10" cols="30" required> </textarea><br> 
+                            <input type="submit" value="Send">
                         </form>
                     </div>
                     

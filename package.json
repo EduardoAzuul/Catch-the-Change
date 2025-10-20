@@ -20,9 +20,12 @@
   "homepage": "https://github.com/EduardoAzuul/Catch-the-Change#readme",
   "dependencies": {
     "axios": "^1.12.2",
+    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+    "nodemailer": "^7.0.9",
     "nodemon": "^3.1.10"
   }
 }
