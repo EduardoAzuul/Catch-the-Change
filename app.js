@@ -91,7 +91,7 @@ app.post('/send', async (req, res) => {
         from: `"${name}" <${email}>`,
       to: testAccount.user,
       subject: subject,
-      text: `Message:\n${message}`
+      text: `${message}`
     });
 
      //saves submission into json file
