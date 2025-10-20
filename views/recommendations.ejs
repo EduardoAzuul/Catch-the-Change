@@ -157,7 +157,7 @@
         const data = Object.fromEntries(formData.entries());//converts data into a hash table
         const modalTitle = document.getElementById('Modal_head');
         const modalMessage = document.getElementById('Modal_body');
-
+        document.getElementById('contactForm').reset();
         try { //converts the info to json file and sends it to the server
             const response = await fetch('/send', {
             method: 'POST',
