@@ -72,10 +72,10 @@ app.get("/recommendations", (req, res) => {
 
 //sending an email
 app.post('/send', async (req, res) => {
+
   const { name, email, subject, message } = req.body;
 
   try {
-
     let testAccount = await nodemailer.createTestAccount(); //creates a test account
 
     let transporter = nodemailer.createTransport({ //sets up a connection to the fake SMTP server
@@ -113,11 +113,9 @@ app.post('/send', async (req, res) => {
     fs.writeFileSync(submissionsPath, JSON.stringify(submissions, null, 2));
 
      // Sends a confirmation message
-    res.status(200).send(`✅ Email sent! Preview it here: ${nodemailer.getTestMessageUrl(info)}`);
-
+      res.json({ success: true, received: req.body });
       } catch (err) { //if the mail wasn't sent...
-    console.error('Error sending email:', err);//sends a message that there was an error
-    res.status(500).send('❌ Failed to send email.');
+      res.json({ success: false, received: req.body });
   }
 });
 
