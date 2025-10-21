@@ -157,6 +157,7 @@
         const data = Object.fromEntries(formData.entries());//converts data into a hash table
         const modalTitle = document.getElementById('Modal_head');
         const modalMessage = document.getElementById('Modal_body');
+        const modal = new bootstrap.Modal(document.getElementById('ConfirmationModal'))
         document.getElementById('contactForm').reset();
         try { //converts the info to json file and sends it to the server
             const response = await fetch('/send', {
@@ -168,12 +169,12 @@
             const result = await response.json();//saves the server response
 
             if (result.success) {
-                new bootstrap.Modal(document.getElementById('ConfirmationModal')).show();//the modal from bootstrap is opened
+                modal.show();//the modal from bootstrap is opened
                 modalTitle.textContent = "Message Sent!";
                 modalMessage.textContent = "Thanks for reaching out! We'll get back to you soon :)";
             }
         } catch (err) {
-            new bootstrap.Modal(document.getElementById('ConfirmationModal')).show();//the modal from bootstrap is opened
+            modal.show();//the modal from bootstrap is opened
             modalTitle.textContent = "Oops!";
             modalMessage.textContent = "Something went wrong. Please try again later.";
         }

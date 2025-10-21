@@ -76,23 +76,6 @@ app.post('/send', async (req, res) => {
   const { name, email, subject, message } = req.body;
 
   try {
-    let testAccount = await nodemailer.createTestAccount(); //creates a test account
-
-    let transporter = nodemailer.createTransport({ //sets up a connection to the fake SMTP server
-      host: 'smtp.ethereal.email',
-      port: 587,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass
-      }
-    });
-
-    let info = await transporter.sendMail({ //sends the email
-        from: `"${name}" <${email}>`,
-      to: testAccount.user,
-      subject: subject,
-      text: `${message}`
-    });
 
      //saves submission into json file
     let submissions = [];
@@ -107,7 +90,6 @@ app.post('/send', async (req, res) => {
       subject,
       message,
       date: new Date(),
-      previewUrl: nodemailer.getTestMessageUrl(info)
     });
 
     fs.writeFileSync(submissionsPath, JSON.stringify(submissions, null, 2));
