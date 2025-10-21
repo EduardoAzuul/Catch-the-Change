@@ -73,5 +73,35 @@ Document how you used Gen AI (e.g., Copilot, ChatGPT, etc.)
 **************************************************
 
 
+20/10/25 - Jetzuvely González
 
+Project / Module: Catch the Change - Web Development
+
+Planned goals for the session:
+
+[ :) ] Make CSS changes to improve design and responsiveness.
+
+[ :) ] Research how to implement maps using GeoJSON.
+
+[ :) ] Test how to use the navigation toggle and media queries.
+
+Work actually done:
+In this session, I focused mainly on improving the CSS of the website, adjusting elements such as the Mission section and the navigation bar to make them more responsive and visually appealing across different screen sizes. I also researched how to use GeoJSON maps to display commercial zones and protected areas in Mexico, although full integration will be done in future sessions. Additionally, I tested features such as the navigation toggle and media queries to control the visibility and size of certain elements on mobile devices.
+
+Learning and observations:
+
+Adjusting CSS and media queries requires attention to the behavior of each element on different devices.
+
+Understanding the logic of toggles and responsive menus helps improve user experience.
+
+Researching GeoJSON maps gave me insight into available methods and tools, even though full implementation will come later.
+I used AI mainly to clarify specific doubts and learn new techniques. I asked for help with:
+
+Implementing the navigation toggle.
+
+Using media queries to make images and sections responsive.
+
+Understanding GeoJSON map integration methods.
+
+AI provided clear suggestions, code examples, and guidance that helped me apply these features correctly. I also complemented this with tutorial videos to better understand the concepts. Overall, AI supported my learning without doing the work for me.
 
