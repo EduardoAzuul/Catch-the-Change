@@ -100,8 +100,8 @@
 }
 
 .hero-title {
+    font-size: 6vw;
     font-family: 'Sacramento', cursive;
-    font-size: 3.2rem;
     margin-bottom: 10px;
     color: #e9fbff;
 }
@@ -156,19 +156,28 @@ p, ul{
     background: linear-gradient(white,#b9eff9);
     border-radius: 10px;
     padding: 10px;
-    width: 70%;
+    width: 100%;
+    max-width: 900px;
     box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
     margin-top: 10px;
     margin-bottom: 20px;
     display: flex;
+    flex-wrap:wrap;
+    justify-content:center;
 
 }
-
 
 .contact, .forms{
     align-items: center;
     padding: 20px;
     width: 50%;
+     min-width: 300px;
+}
+
+@media (max-width: 768px) {
+  .contact, .forms {
+    width: 100%;
+  }
 }
 
 .government1, .government2, .ORG1, .ORG2{
