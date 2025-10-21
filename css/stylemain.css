@@ -170,6 +170,30 @@ body {
     transform: scale(1.05);
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
 }
+/* =================================
+   MISSION SECTION - IMAGE STACK RESPONSIVE
+   ================================= */
+@media (max-width: 767px) {
+  .image-stack {
+    max-width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .main-img,
+  .overlay-img {
+    position: relative !important; 
+    width: 100% !important;
+    height: auto !important;
+    bottom: auto !important;
+    right: auto !important;
+    margin-bottom: 10px;
+  }
+
+  #mission .col-md-6 {
+    text-align: center; 
+  }
+}
+
 
 /* =================================
    ABOUT SECTION
