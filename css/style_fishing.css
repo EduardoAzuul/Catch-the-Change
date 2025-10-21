@@ -105,6 +105,29 @@
     border-radius: 30px;
     padding: 12px 26px;
 }
+/* =================================
+   MAP SECTION CENTERING
+   ================================= */
+
+.map {
+    text-align: center;  
+    margin: 0 auto;
+}
+
+.map h2 {
+    text-align: center;  
+    margin-bottom: 20px;
+    color: var(--azul-oscuro);
+}
+
+.map img {
+    display: block;
+    margin: 0 auto;     
+    border-radius: 8px;
+    max-width: 100%;     
+    height: auto;        
+}
+
 
 /* =================================
    MAIN CONTENT STYLES
