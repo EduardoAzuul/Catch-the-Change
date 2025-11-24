@@ -1,0 +1,125 @@
+import React, { useState, useEffect, useRef } from 'react';
+
+import Header from '../components/header.jsx';
+import Footer from '../components/footer.jsx';
+import FishingMap from './fishingmap.jsx';
+
+import '../css/style_fishing.css';
+import scrollFade from '../js/scrollFade.js';
+
+function Fishing() {
+    scrollFade();
+
+    return (
+        <React.Fragment>
+
+            <meta charSet="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Fishing Activity</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"></link>
+            <link rel="preconnect" href="https://fonts.googleapis.com"></link>
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true"></link>
+            <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Raleway:ital@0;1&family=Sacramento&display=swap" rel="stylesheet"></link>
+            <link rel="icon" href="images/logo.png" type="image/x-icon"></link>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+            <Header />
+
+            <section id="home" className="hero">
+                <video id="heroVideo" className="hero-media" autoPlay muted loop playsInline poster="Images/HeroImages/fishing.jpg"></video>
+                <div className="hero-overlay container text-center">
+                    <h1 className="hero-title">Fishing Activity</h1>
+                    <p className="hero-sublead">Protecting Life Below Water empowering fishers and communities with
+                        data, maps and sustainable practices.</p>
+                </div>
+            </section>
+
+            <main id="main" className="container my-5">
+                <section className="mb-5">
+                    <h2>Mexico Economic Zone and Protected Areas</h2>
+                    
+                    <FishingMap />
+
+                    <h2>What Is Illegal Fishing?</h2>
+                    <p>
+                        Illegal fishing refers to fishing activities that violate national,
+                        regional, or international fisheries laws and regulations. Examples
+                        include:
+                    </p>
+                    <ul>
+                        <li>Fishing without a license or permit</li>
+                        <li>Exceeding catch quotas</li>
+                        <li>Using banned gear or fishing during closed seasons</li>
+                        <li>Targeting protected species</li>
+                        <li>Operating in areas without permission or contrary to conservation measures</li>
+                    </ul>
+                    <p>The broader term is IUU fishing:</p>
+                    <ul>
+                        <li><b>Illegal:</b> Fishing in violation of laws or regulations.</li>
+                        <li>
+                            <b>Unreported:</b> Activities not reported or misreported to authorities.
+                        </li>
+                        <li>
+                            <b>Unregulated:</b> Fishing in areas lacking management or by
+                            vessels not subject to applicable rules
+                        </li>
+                    </ul>
+                    <br />
+                    <h2>Why It Matters to Avoid Illegal Fishing</h2>
+                    <p>
+                        Avoiding illegal fishing is essential because it protects marine
+                        ecosystems, prevents overfishing, and helps preserve biodiversity. It
+                        also secures food sources for billions of people and supports the
+                        livelihoods of millions who depend on fisheries. In addition, reducing
+                        illegal fishing prevents massive economic losses, which are estimated
+                        to reach up to 36 billion USD every year. By respecting fishing
+                        regulations, countries ensure sustainability, fairness, and long-term
+                        ocean health.
+                    </p>
+                    <br />
+                    <h2>Sanctions and Penalties</h2>
+                    <p>
+                        The sanctions for illegal fishing vary across countries but usually
+                        involve fines, imprisonment, or loss of equipment. For example, in
+                        India, fines can go up to ₹50,000 and include jail time, while in
+                        Australia, offenders have faced penalties of more than AUD 800,000,
+                        community service, and even the confiscation of boats and gear. These
+                        penalties are designed to discourage illegal practices and highlight
+                        the seriousness of protecting marine resources.
+                    </p>
+                    <br />
+                    <h2>What Governments Do to Reduce Illegal Fishing</h2>
+                    <p>
+                        To reduce illegal fishing, governments and international organizations
+                        have developed several strategies. These include treaties such as the
+                        Port State Measures Agreement (PSMA), which prevents illegally caught
+                        fish from entering markets, and the EU IUU Regulation, which enforces
+                        strict import controls and sanctions non-cooperating countries.
+                        Regional operations, like Operation Kurukuru in the Pacific, monitor
+                        vast ocean areas with the help of multiple nations. Technology also
+                        plays a key role, with tools such as Global Fishing Watch, which uses
+                        satellite data to track suspicious vessels in real time. Through laws,
+                        enforcement, surveillance, and trade restrictions, governments work to
+                        protect oceans and promote sustainable fishing.
+                    </p>
+                </section>
+                <section className="mb-5">
+                    <h2>Data Accuracy and Limitations</h2>
+                    <p>
+                        The figures and examples presented in this page, such as economic losses or
+                        penalties, are based on available reports and estimates. However, the exact
+                        numbers may vary due to differences in reporting standards, changes in regulations,
+                        or unreported activities. Readers should consider these values as indicative rather
+                        than precise, and consult primary sources for critical decision-making or research purposes.
+                    </p>
+                </section>
+            </main>
+
+
+            <Footer />
+
+        </React.Fragment >
+    );
+};
+
+export default Fishing;

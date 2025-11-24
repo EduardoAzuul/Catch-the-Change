@@ -1,0 +1,24 @@
+{
+  "name": "catch-the-change",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EduardoAzuul/Catch-the-Change.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EduardoAzuul/Catch-the-Change/issues"
+  },
+  "dependencies": {
+    "mongoose": "^8.19.1",
+    "express": "^5.1.0",
+    "cors": "^2.8.5"
+  }
+}
