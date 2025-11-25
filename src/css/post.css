@@ -1,0 +1,152 @@
+/* ============================================================
+   POST/COMENTARIOS COMPONENT — Estilo coherente con Endangered Species
+   ============================================================ */
+
+/* 1. Variables de Color (Copiadas de style_endangered.css para asegurar consistencia) */
+:root {
+  --azul-claro: #CAF0F8;        /* El color de fondo secundario */
+  --azul-oscuro: #03045E;       /* El color de texto principal */
+  --azul-intermedio: #023E8A;   /* Color para encabezados y bordes */
+  --azul-secundario: #0077B6;   /* Color principal de acento y botones */
+  --blanco: #ffffff;
+  --color-fondo-main: #f8f9fa; /* Un gris muy claro para el fondo fuera del contenedor principal */
+}
+
+/* 2. Estilos Generales y Tipografía */
+#root {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--azul-oscuro);
+    background-color: var(--color-fondo-main);
+}
+
+/* Título de sección - ELIMINADA FUENTE TIPO COMIC/CURSIVA */
+.mh2 {
+    font-family: 'Montserrat', sans-serif; 
+    font-size: 30px;
+    margin-bottom: 20px;
+    color: var(--azul-intermedio);
+    font-weight: 700;
+}
+
+/* Estilo para el fondo del main content */
+.main-bg {
+    background-color: var(--blanco) !important;
+    padding: 50px 0;
+    min-height: 80vh;
+}
+
+/* 3. Estilo de la Tarjeta de Login (para usuarios no logueados) */
+.auth-card {
+    background-color: var(--blanco);
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Contenido dentro de la carta: ya cubierto por Bootstrap p-5 en posts.jsx */
+}
+
+.auth-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.auth-icon {
+    color: var(--azul-secundario);
+    animation: pulse-icon 1.5s infinite; 
+}
+
+@keyframes pulse-icon {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+
+/* 4. Tarjeta de Usuario Logueado (.user-card) */
+.user-card {
+    border-left: 5px solid var(--azul-secundario) !important;
+    border-radius: 10px;
+    transition: box-shadow 0.3s ease;
+    background-color: var(--blanco);
+    /* El padding p-4 de posts.jsx ya contiene el contenido */
+}
+
+.user-card:hover {
+    box-shadow: 0 6px 16px rgba(0, 119, 182, 0.1) !important;
+}
+
+/* 5. Tarjeta para Agregar Comentario (.comment-form-card) */
+.comment-form-card {
+    background-color: var(--azul-claro) !important;
+    border-radius: 10px;
+    padding: 25px; /* Contenido dentro de la carta */
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.comment-form-card .form-control {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 2px solid var(--azul-claro);
+    padding-left: 15px; /* Borde interno en el textarea */
+}
+
+.comment-form-card .form-control:focus {
+    border-color: var(--azul-secundario) !important;
+    box-shadow: 0 0 0 0.25rem rgba(0, 119, 182, 0.25) !important;
+    background-color: var(--blanco);
+}
+
+/* 6. Lista de Comentarios y Tarjeta Individual (.comment-card) */
+.comment-card {
+    background-color: var(--blanco) !important;
+    border: 1px solid var(--azul-claro) !important;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03); 
+}
+
+.comment-card:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* **ESTILO DE BORDE EN EL CONTENIDO DEL COMENTARIO** */
+.comment-card .card-body {
+    /* El padding p-4 de posts.jsx ya contiene el contenido dentro de la tarjeta. 
+       Añadimos un indicador visual en el borde izquierdo del cuerpo del comentario. */
+    border-left: 3px solid var(--azul-claro); 
+    padding-left: 18px !important; /* Más padding para separar del borde izquierdo */
+    padding-right: 18px !important;
+}
+
+/* Avatar del comentarista */
+.comment-card .rounded-circle {
+    border: 2px solid var(--azul-intermedio);
+    transition: border 0.3s ease;
+}
+
+/* Texto del comentario */
+.comment-card p.text-dark {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-top: 10px;
+    color: var(--azul-oscuro) !important;
+    padding-left: 5px; /* Pequeño ajuste para el texto en sí */
+}
+
+/* 7. Botones de Acción (Editar/Eliminar) */
+.comment-card .btn-sm {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.comment-card .btn-outline-primary {
+    color: var(--azul-intermedio);
+    border-color: var(--azul-intermedio);
+}
+
+.comment-card .btn-outline-primary:hover {
+    background-color: var(--azul-intermedio);
+    color: var(--blanco);
+}

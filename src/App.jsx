@@ -5,6 +5,7 @@ import Landing from './pages/Landing';
 import Recommendations from './pages/recommendations';
 import Endagered from './pages/endangered_species';
 import Fishing from './pages/fishing_activity';
+import Posts from './pages/posts';
 
 import './css/main.css'
 import './js/app.js';
@@ -18,6 +19,7 @@ const App = () => {
                 <Route path="/endangered_species" element={<Endagered />} />
                 <Route path="/fishing_activity" element={<Fishing />} />
                 <Route path="/recommendations" element={<Recommendations />} />
+                <Route path="/posts" element={<Posts />} />
             </Routes>
         </Router>
     );
