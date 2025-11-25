@@ -1,9 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import "leaflet/dist/leaflet.css";
 
 export default function FishingMap() {
     const leafletInstance = useRef(null);
+    const [loading, setLoading] = useState(true);
+    const [loadingProgress, setLoadingProgress] = useState(0);
 
     useEffect(() => {
         leafletInstance.current = L.map('map').setView([23.6345, -102.5528], 5);
@@ -18,6 +20,7 @@ export default function FishingMap() {
             try {
                 const res = await fetch("http://localhost:4000/api/economicZoneLayer");
                 const data = await res.json();
+                setLoadingProgress(33);
 
                 return L.geoJSON(data, {
                     style: {
@@ -46,6 +49,7 @@ export default function FishingMap() {
             try {
                 const res = await fetch("http://localhost:4000/api/protectedAreas1Layer");
                 const data = await res.json();
+                setLoadingProgress(66);
 
                 return L.geoJSON(data, {
                     style: {
@@ -74,6 +78,7 @@ export default function FishingMap() {
             try {
                 const res = await fetch("http://localhost:4000/api/protectedAreas2Layer");
                 const data = await res.json();
+                setLoadingProgress(100);
 
                 return L.geoJSON(data, {
                     style: {
@@ -99,7 +104,6 @@ export default function FishingMap() {
         };
 
         // Add legend
-        // Layer control to toggle visibility
         const legend = L.control({ position: 'bottomright' });
         legend.onAdd = function (map) {
             const div = L.DomUtil.create('div', 'legend');
@@ -124,42 +128,116 @@ export default function FishingMap() {
 
         // Layer control to toggle visibility
         const loadLayers = async () => {
-            const economicZoneLayer = await fetcheconomicZoneLayer();
-            const protectedAreas1Layer = await fetchprotectedAreas1Layer();
-            const protectedAreas2Layer = await fetchprotectedAreas2Layer();
-            const overlays = {
-                "Mexico Economic Zone": economicZoneLayer,
-                "Protected Areas 1": protectedAreas1Layer,
-                "Protected Areas 2": protectedAreas2Layer
-            };
-            L.control.layers(null, overlays).addTo(leafletInstance.current);
+            try {
+                const economicZoneLayer = await fetcheconomicZoneLayer();
+                const protectedAreas1Layer = await fetchprotectedAreas1Layer();
+                const protectedAreas2Layer = await fetchprotectedAreas2Layer();
+                
+                const overlays = {
+                    "Mexico Economic Zone": economicZoneLayer,
+                    "Protected Areas 1": protectedAreas1Layer,
+                    "Protected Areas 2": protectedAreas2Layer
+                };
+                L.control.layers(null, overlays).addTo(leafletInstance.current);
 
-            // Fit map to show all layers
-            const allLayers = L.featureGroup([
-                economicZoneLayer,
-                protectedAreas1Layer,
-                protectedAreas2Layer
-            ]);
-            leafletInstance.current.fitBounds(allLayers.getBounds());
+                // Fit map to show all layers
+                const allLayers = L.featureGroup([
+                    economicZoneLayer,
+                    protectedAreas1Layer,
+                    protectedAreas2Layer
+                ]);
+                leafletInstance.current.fitBounds(allLayers.getBounds());
+                
+                setLoading(false);
+            } catch (error) {
+                console.error("Error loading layers:", error);
+                setLoading(false);
+            }
         }
 
         loadLayers();
 
         return () => {
-            leafletInstance.current?.remove(); // cleanup on component unmount
+            leafletInstance.current?.remove();
         };
 
     }, []);
 
-    return <div id="map"
-        ref={leafletInstance}
-        style={{
-            height: "600px",
-            width: "80%",
-            display: 'block',
-            margin: '0 auto',
-            borderRadius: "12px",
-            overflow: "hidden",
-        }}
-    />
-};
+    return (
+        <div style={{ position: 'relative', width: '80%', margin: '0 auto' }}>
+            {loading && (
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000,
+                    borderRadius: '12px',
+                    minHeight: '600px'
+                }}>
+                    <div style={{
+                        width: '60px',
+                        height: '60px',
+                        border: '6px solid #e0e0e0',
+                        borderTop: '6px solid #3388ff',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        marginBottom: '20px'
+                    }}></div>
+                    <p style={{
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        color: '#333',
+                        marginBottom: '10px'
+                    }}>
+                        Loading information...
+                    </p>
+                    <div style={{
+                        width: '300px',
+                        height: '8px',
+                        backgroundColor: '#e0e0e0',
+                        borderRadius: '4px',
+                        overflow: 'hidden'
+                    }}>
+                        <div style={{
+                            width: `${loadingProgress}%`,
+                            height: '100%',
+                            backgroundColor: '#3388ff',
+                            transition: 'width 0.3s ease'
+                        }}></div>
+                    </div>
+                    <p style={{
+                        fontSize: '14px',
+                        color: '#666',
+                        marginTop: '10px'
+                    }}>
+                        {loadingProgress}%
+                    </p>
+                    <style>{`
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    `}</style>
+                </div>
+            )}
+            <div 
+                id="map"
+                ref={leafletInstance}
+                style={{
+                    height: "600px",
+                    width: "100%",
+                    display: 'block',
+                    borderRadius: "12px",
+                    overflow: "hidden",
+                }}
+            />
+        </div>
+    );
+}
