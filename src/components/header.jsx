@@ -22,6 +22,7 @@ const Header = () => {
                             <a className="btn btn-outline-light btn-sm" href="/fishing_activity">Fishing Activity</a>
                             <a className="btn btn-outline-light btn-sm" href="/recommendations">Recommendations</a>
                             <a className="btn btn-outline-light btn-sm" href="/posts">Posts</a>
+                            <a className="btn btn-outline-light btn-sm" href="/profile">Profile</a>
                         </div>
                     </div>
                 </div>

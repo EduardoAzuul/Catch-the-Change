@@ -1,27 +1,28 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-console.log("[Model] Cargando modelo Post...");
-
-const PostSchema = new mongoose.Schema({
-    title: {
+const postSchema = new mongoose.Schema({
+    author: {
         type: String,
         required: true
     },
-    content: {
+    authorEmail: {
         type: String,
         required: true
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
+    authorPicture: {
+        type: String,
+        required: true
+    },
+    text: {
+        type: String,
+        required: true
+    },
+    userId: {
+        type: String,
+        required: true
     }
+}, {
+    timestamps: true // Esto crea automáticamente createdAt y updatedAt
 });
 
-// Debug para verificar que el modelo se compila correctamente
-console.log("[Model] Compilando modelo Post en Mongoose...");
-
-const Post = mongoose.model("Post", PostSchema);
-
-console.log("[Model] Modelo Post cargado exitosamente.");
-
-module.exports = Post;
+module.exports = mongoose.model('Post', postSchema);

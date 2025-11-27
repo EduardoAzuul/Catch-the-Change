@@ -1,0 +1,110 @@
+/* Variables de color basadas en tu ejemplo para consistencia */
+:root {
+    --azul-claro: #CAF0F8;
+    --azul-oscuro: #03045E;
+    --azul-intermedio: #023E8A;
+    --azul-secundario: #0077B6;
+    --blanco: #ffffff;
+    --gris-claro: #f8f9fa;
+    --sombra-fuerte: 0 10px 30px rgba(0, 50, 80, 0.2);
+    --sombra-media: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* 1. Fondo principal para el perfil */
+.min-vh-100 {
+    /* Asegura que la tarjeta esté bien centrada verticalmente */
+    min-height: 100vh;
+    background-color: var(--gris-claro); 
+    background-image: linear-gradient(135deg, var(--azul-claro) 0%, var(--gris-claro) 100%);
+}
+
+/* 2. Estilos de la tarjeta de perfil */
+.profile-card {
+    width: 100%;
+    max-width: 400px; /* Tamaño máximo para escritorio */
+    background-color: var(--blanco);
+    border: none;
+    border-radius: 20px;
+    padding: 30px !important; 
+    box-shadow: var(--sombra-fuerte);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden; /* Para contener la sombra del hover */
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 50, 80, 0.3);
+}
+
+/* 3. Estilos de la imagen de perfil */
+.profile-img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 5px solid var(--azul-secundario); /* Borde azul vibrante */
+    box-shadow: var(--sombra-media);
+    transition: transform 0.3s ease;
+}
+
+.profile-card:hover .profile-img {
+    transform: scale(1.05); /* Ligeramente más grande al pasar el ratón */
+}
+
+/* 4. Títulos y texto */
+.profile-card h1 {
+    color: var(--azul-oscuro);
+    font-size: 1.8rem;
+    margin-top: 15px !important;
+    margin-bottom: 5px;
+}
+
+.profile-card p.text-muted {
+    color: var(--azul-intermedio) !important;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* 5. Botón de Cerrar Sesión */
+.profile-card .btn-danger {
+    background-color: #e74c3c; /* Un rojo de peligro más estándar */
+    border-color: #c0392b;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.profile-card .btn-danger:hover {
+    background-color: #c0392b;
+    border-color: #a53022;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+}
+
+/* 6. Estilos de carga (Spinner) */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+    color: var(--azul-secundario) !important;
+}
+
+/* 7. Adaptabilidad móvil (ajustes menores) */
+@media (max-width: 576px) {
+    .profile-card {
+        padding: 20px !important;
+        margin: 20px;
+        border-radius: 15px;
+    }
+
+    .profile-img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-card h1 {
+        font-size: 1.5rem;
+    }
+
+    .profile-card .btn-danger {
+        width: 100%; /* Botón de ancho completo en móvil */
+    }
+}

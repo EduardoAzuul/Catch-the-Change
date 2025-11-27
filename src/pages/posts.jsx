@@ -1,357 +1,405 @@
-import { useState, useEffect } from 'react';
-
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../js/AuthContext';
 import Header from '../components/header.jsx';
 import Footer from '../components/footer.jsx';
 
+const API_URL = "http://localhost:4000/api";
 
-import '../css/post.css'; 
-import scrollFade from '../js/scrollFade.js';
+// --- COMPONENTE PRINCIPAL (Posts) ---
+const Posts = () => {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+    
+    const [posts, setPosts] = useState([]);
+    const [content, setContent] = useState('');
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-export default function ComentariosApp() {
-    const [comentarios, setComentarios] = useState([]);
-    const [nuevoComentario, setNuevoComentario] = useState('');
-    const [editingId, setEditingId] = useState(null);
-    const [editingText, setEditingText] = useState('');
-    const [user, setUser] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [googleLoaded, setGoogleLoaded] = useState(false);
-
-    // =======================================================
-    // FUNCIÓN CRÍTICA: MANEJA LA RESPUESTA DE GOOGLE SIGN-IN
-    // =======================================================
-    const handleCredentialResponse = (response) => {
-        console.log("Credenciales recibidas. Procesando...");
-        const token = response.credential;
-        // Intenta decodificar el token para obtener los datos del usuario
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-
-            const userData = {
-                name: payload.name,
-                email: payload.email,
-                picture: payload.picture,
-                sub: payload.sub // Identificador único de Google
-            };
-
-            // *** ESTO ES LO CRÍTICO: Actualiza el estado y fuerza el re-renderizado ***
-            setUser(userData); 
-            sessionStorage.setItem('user', JSON.stringify(userData));
-            console.log("Usuario logueado y estado actualizado.");
-        } catch (error) {
-            console.error("Error al decodificar el token de Google:", error);
-            setUser(null);
-        }
-    };
-
-    const signOut = () => {
-        if (window.google) {
-            // Deshabilita la selección automática para el próximo inicio
-            window.google.accounts.id.disableAutoSelect();
-        }
-        setUser(null);
-        sessionStorage.removeItem('user');
-        setComentarios([]); // Opcional: limpiar comentarios en el logout
-    };
-
-    // Efecto para cargar el script de Google y su inicialización
+    // Verificar que el usuario esté autenticado
     useEffect(() => {
-        const initGoogleAuth = () => {
-            if (window.google) {
-                // ** IMPORTANTE: Reemplaza 'YOUR_CLIENT_ID' con tu ID real de Google **
-                const CLIENT_ID = '506755432338-pn9so2lvkvlsjru9dq065e7vfnf29iur.apps.googleusercontent.com'; 
-                
-                if (CLIENT_ID === 'YOUR_CLIENT_ID') {
-                    console.error("ADVERTENCIA: Debes reemplazar 'YOUR_CLIENT_ID' con tu ID de cliente real.");
-                    setIsLoading(false);
-                    return;
-                }
+        if (!user) {
+            navigate('/login');
+        }
+    }, [user, navigate]);
 
-                window.google.accounts.id.initialize({
-                    client_id: CLIENT_ID,
-                    callback: handleCredentialResponse,
+    // Cargar posts al montar el componente
+    useEffect(() => {
+        if (user) {
+            fetchPosts();
+        }
+    }, [user]);
+
+    // Si no hay usuario, no renderizar nada
+    if (!user) {
+        return null;
+    }
+
+    // Función para obtener todos los posts desde MongoDB
+    const fetchPosts = async () => {
+        try {
+            console.log('🔄 Obteniendo posts desde el servidor...');
+            setLoading(true);
+            const response = await fetch(`${API_URL}/posts`);
+            
+            if (!response.ok) {
+                throw new Error('Error al cargar los posts');
+            }
+            
+            const data = await response.json();
+            console.log('✅ Posts recibidos del servidor:', data.length);
+            setPosts(data);
+        } catch (err) {
+            console.error('❌ Error al obtener posts:', err);
+            setError('Error al cargar los posts');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleContentChange = (e) => {
+        setContent(e.target.value);
+        if (error) setError(null);
+    };
+
+    // Crear nuevo post y guardarlo en MongoDB
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!content.trim()) {
+            setError('Por favor, ingresa el contenido del post.');
+            return;
+        }
+
+        try {
+            console.log('📤 Enviando nuevo post al servidor...');
+            const response = await fetch(`${API_URL}/posts`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    author: user.name,
+                    authorEmail: user.email,
+                    authorPicture: user.picture,
+                    text: content.trim(),
+                    userId: user.email
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al crear el post');
+            }
+
+            const newPost = await response.json();
+            console.log('✅ Post creado exitosamente:', newPost.id);
+            
+            setPosts(prevPosts => [newPost, ...prevPosts]);
+            setContent('');
+            setError(null);
+        } catch (err) {
+            console.error('❌ Error al crear post:', err);
+            setError(err.message || 'Error al publicar el post');
+        }
+    };
+
+    // Componente para cada post individual
+    const PostItem = ({ post }) => {
+        const isOwner = post.authorEmail === user.email;
+        const [isEditing, setIsEditing] = useState(false);
+        const [editText, setEditText] = useState(post.text);
+        const [editError, setEditError] = useState(null);
+
+        // Actualizar post en MongoDB
+        const handleSave = async () => {
+            if (!editText.trim()) {
+                setEditError('El contenido del post no puede estar vacío.');
+                return;
+            }
+            
+            try {
+                console.log('📤 Actualizando post en el servidor...');
+                const response = await fetch(`${API_URL}/posts/${post.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: editText.trim(),
+                        userId: user.email
+                    })
                 });
 
-                setGoogleLoaded(true);
-            }
-            setIsLoading(false);
-        };
-
-        // Comprobación para evitar cargar el script múltiples veces
-        if (!window.google) {
-            const script = document.createElement('script');
-            script.src = 'https://accounts.google.com/gsi/client';
-            script.async = true;
-            script.defer = true;
-            script.onload = initGoogleAuth;
-            document.body.appendChild(script);
-
-            return () => {
-                document.body.removeChild(script);
-            };
-        } else {
-            initGoogleAuth();
-        }
-    }, []);
-
-    // Efecto para renderizar el botón de Google
-    useEffect(() => {
-        const buttonElement = document.getElementById('googleSignInButton');
-
-        if (googleLoaded && !user && buttonElement && window.google) {
-            // Renderiza el botón solo si el usuario NO está logueado
-            window.google.accounts.id.renderButton(
-                buttonElement,
-                {
-                    theme: 'outline',
-                    size: 'large',
-                    width: 300,
-                    text: 'signin_with'
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error al actualizar el post');
                 }
-            );
-            // Esto es opcional, puede forzar una ventana de "logueo automático"
-            // window.google.accounts.id.prompt(); 
-        }
-    }, [googleLoaded, user]);
 
-    // Efecto para cargar comentarios y usuario desde sessionStorage (persistencia)
-    useEffect(() => {
-        const savedComments = sessionStorage.getItem('comentarios');
-        if (savedComments) {
-            setComentarios(JSON.parse(savedComments));
-        }
-
-        const savedUser = sessionStorage.getItem('user');
-        if (savedUser) {
-            setUser(JSON.parse(savedUser));
-        }
-    }, []);
-
-    // Efecto para guardar comentarios en sessionStorage
-    useEffect(() => {
-        if (comentarios.length > 0 || sessionStorage.getItem('comentarios')) {
-            sessionStorage.setItem('comentarios', JSON.stringify(comentarios));
-        }
-    }, [comentarios]);
-
-    const agregarComentario = () => {
-        if (!nuevoComentario.trim()) return;
-
-        const comentario = {
-            id: Date.now(),
-            nombre: user.name,
-            email: user.email,
-            picture: user.picture,
-            userId: user.sub,
-            texto: nuevoComentario,
-            fecha: new Date().toLocaleString()
+                const updatedPost = await response.json();
+                console.log('✅ Post actualizado exitosamente:', updatedPost.id);
+                
+                setPosts(prevPosts => 
+                    prevPosts.map(p => 
+                        p.id === post.id ? updatedPost : p
+                    )
+                );
+                
+                setIsEditing(false);
+                setEditError(null);
+            } catch (err) {
+                console.error('❌ Error al actualizar post:', err);
+                setEditError(err.message || 'Error al actualizar el post');
+            }
         };
 
-        setComentarios([comentario, ...comentarios]);
-        setNuevoComentario('');
-    };
+        // Eliminar post de MongoDB
+        const handleDelete = async () => {
+            if (!window.confirm('¿Estás seguro de que quieres eliminar este post?')) {
+                return;
+            }
 
-    const eliminarComentario = (id) => {
-        setComentarios(comentarios.filter(c => c.id !== id));
-    };
+            try {
+                console.log('📤 Eliminando post del servidor...');
+                const response = await fetch(`${API_URL}/posts/${post.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: user.email
+                    })
+                });
 
-    const startEditing = (comment) => {
-        setEditingId(comment.id);
-        setEditingText(comment.texto);
-    };
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error al eliminar el post');
+                }
 
-    const cancelEditing = () => {
-        setEditingId(null);
-        setEditingText('');
-    };
+                console.log('✅ Post eliminado exitosamente:', post.id);
+                setPosts(prevPosts => prevPosts.filter(p => p.id !== post.id));
+            } catch (err) {
+                console.error('❌ Error al eliminar post:', err);
+                alert(err.message || 'Error al eliminar el post');
+            }
+        };
 
-    const saveEdit = (id) => {
-        setComentarios(comentarios.map(c =>
-            c.id === id ? { ...c, texto: editingText } : c
-        ));
-        cancelEditing();
-    };
-
-
-    /* =======================================================
-       RENDERIZADO CONDICIONAL
-       ======================================================= */
-
-    if (isLoading) {
         return (
-            <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
-                <div className="text-center">
-                    <div className="spinner-border text-primary mb-3" role="status" style={{ width: '3rem', height: '3rem' }}>
-                        <span className="visually-hidden">Cargando...</span>
+            <div className="card shadow-sm border-start border-5 border-success h-100">
+                <div className="card-body p-4">
+                    {editError && (
+                        <div className="alert alert-danger mb-3" role="alert">
+                            <strong>Error:</strong> {editError}
+                        </div>
+                    )}
+                    
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                        <div className="d-flex align-items-center">
+                            <img 
+                                src={post.authorPicture} 
+                                alt={post.author}
+                                className="rounded-circle me-2"
+                                style={{ width: '40px', height: '40px' }}
+                            />
+                            <div>
+                                <h5 className="mb-0 text-success">
+                                    {post.author}
+                                    {isOwner && (
+                                        <span className="badge bg-primary ms-2" style={{ fontSize: '0.7rem' }}>
+                                            Tú
+                                        </span>
+                                    )}
+                                </h5>
+                                <small className="text-muted">{post.authorEmail}</small>
+                            </div>
+                        </div>
+                        
+                        <span className="text-muted small">
+                            <i className="far fa-calendar-alt me-1"></i>
+                            {post.date}
+                        </span>
                     </div>
-                    <p className="text-muted fs-5">Cargando...</p>
+                    
+                    {isEditing ? (
+                        <textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            className="form-control mb-3"
+                            rows="4"
+                        />
+                    ) : (
+                        <p className="card-text text-dark mt-3" style={{ whiteSpace: 'pre-wrap' }}>
+                            {post.text}
+                        </p>
+                    )}
+
+                    {isOwner && (
+                        <div className="mt-3 pt-3 border-top d-flex justify-content-end gap-2">
+                            {isEditing ? (
+                                <>
+                                    <button
+                                        onClick={handleSave}
+                                        className="btn btn-success btn-sm"
+                                    >
+                                        <i className="fas fa-check me-1"></i> Guardar
+                                    </button>
+                                    <button
+                                        onClick={() => { 
+                                            setIsEditing(false); 
+                                            setEditText(post.text); 
+                                            setEditError(null); 
+                                        }}
+                                        className="btn btn-secondary btn-sm"
+                                    >
+                                        <i className="fas fa-times me-1"></i> Cancelar
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => setIsEditing(true)}
+                                        className="btn btn-primary btn-sm"
+                                    >
+                                        <i className="fas fa-edit me-1"></i> Editar
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="btn btn-danger btn-sm"
+                                    >
+                                        <i className="fas fa-trash-alt me-1"></i> Eliminar
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         );
-    }
-    
-    // Vista de NO LOGUEADO
-    if (!user) {
+    };
+
+    // Mostrar loading mientras carga
+    if (loading) {
         return (
-            <>
+            <div className="bg-light min-vh-100">
                 <Header />
-
-
-
-                <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'var(--azul-intermedio)' }}>
-                    <div className="card shadow-lg border-0 auth-card" style={{ maxWidth: '400px' }}>
-                        <div className="card-body p-5 text-center">
-                            <div className="mb-4">
-                                <p className="text-muted">Log in with google</p>
-                            </div>
-                            <div className="d-flex justify-content-center mb-4">
-                                <div id="googleSignInButton"></div>
-                            </div>
-                            <div className="mt-4 pt-3 border-top">
-                                <p className="small text-muted mb-0">
-                                    We use Google sign-in in to keep your information secure
-                                </p>
-                            </div>
-                        </div>
+                <div className="d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
+                    <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
+                        <span className="visually-hidden">Cargando...</span>
                     </div>
                 </div>
                 <Footer />
-            </>
+            </div>
         );
     }
-    
-    // Vista de LOGUEADO
+
     return (
-        <>
+        <div className="bg-light min-vh-100">
             <Header />
 
-            <div className="main-bg py-5" style={{ backgroundColor: 'white' }}>
-                <div className="container">
-                    <div className="row justify-content-center">
-                        <div className="col-12 col-lg-10 col-xl-8">
-
-                            {/* Tarjeta de Usuario */}
-                            <div className="card border-0 shadow-sm mb-4 user-card">
-                                <div className="card-body p-4">
-                                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                                        <div className="d-flex align-items-center gap-3">
-                                            <img
-                                                src={user.picture}
-                                                alt={user.name}
-                                                className="rounded-circle"
-                                                style={{ width: '60px', height: '60px', objectFit: 'cover' }}
-                                            />
-                                            <div>
-                                                <h5 className="mb-1 fw-bold" style={{ color: 'var(--azul-oscuro)' }}>{user.name}</h5>
-                                                <p className="mb-0 text-muted small">{user.email}</p>
-                                            </div>
-                                        </div>
-                                        <button onClick={signOut} className="btn btn-outline-danger rounded-pill px-4">
-                                            Logout
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Título de la Sección de Comentarios */}
-                            <div className="text-center mb-5">
-                                <h2 className="mh2">Coments</h2>
-                                <p className="text-muted">Join Conversation</p>
-                            </div>
-
-                            {/* Tarjeta para Agregar Comentario */}
-                            <div className="card border-0 shadow-sm mb-5 comment-form-card" style={{ backgroundColor: 'var(--azul-claro)' }}>
-                                <div className="card-body p-4">
-                                    <h5 className="card-title fw-bold mb-3" style={{ color: 'var(--azul-secundario)' }}>Add Comment</h5>
-                                    <div className="mb-3">
-                                        <label className="form-label text-muted small">
-                                            Commenting as: <strong style={{ color: 'var(--azul-oscuro)' }}>{user.name}</strong>
-                                        </label>
-                                        <textarea
-                                            value={nuevoComentario}
-                                            onChange={(e) => setNuevoComentario(e.target.value)}
-                                            className="form-control border-2"
-                                            rows="4"
-                                            placeholder="Write your comment here..."
-                                        />
-                                    </div>
-                                    <button
-                                        onClick={agregarComentario}
-                                        disabled={!nuevoComentario.trim()}
-                                        className="btn w-100 py-2 rounded-pill fw-bold"
-                                        style={{ backgroundColor: 'var(--azul-secundario)', color: 'white' }}
-                                    >
-                                        Publicar Comentario
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Lista de Comentarios */}
-                            <div>
-                                <h4 className="fw-bold mb-4" style={{ color: 'var(--azul-intermedio)' }}>
-                                    {comentarios.length === 0 ? 'Sin comentarios aún' : `${comentarios.length} ${comentarios.length === 1 ? 'Comentario' : 'Comentarios'}`}
-                                </h4>
-
-                                {comentarios.length === 0 ? (
-                                    <div className="text-center py-5">
-                                        <p className="text-muted fs-5 mt-3">¡Be the first to comment!</p>
-                                    </div>
-                                ) : (
-                                    <div className="d-flex flex-column gap-3">
-                                        {comentarios.map((comentario) => (
-                                            <div key={comentario.id} className="card border-0 shadow-sm comment-card">
-                                                <div className="card-body p-4">
-                                                    {editingId === comentario.id ? (
-                                                        <div>
-                                                            <textarea
-                                                                value={editingText}
-                                                                onChange={(e) => setEditingText(e.target.value)}
-                                                                className="form-control border-2"
-                                                                rows="3"
-                                                            />
-                                                            <div className="d-flex gap-2 mt-3">
-                                                                <button onClick={() => saveEdit(comentario.id)} className="btn btn-success flex-fill rounded-pill">Guardar</button>
-                                                                <button onClick={cancelEditing} className="btn btn-secondary flex-fill rounded-pill">Cancelar</button>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <div>
-                                                            <div className="d-flex justify-content-between align-items-start mb-3">
-                                                                <div className="d-flex align-items-center gap-3">
-                                                                    <img
-                                                                        src={comentario.picture}
-                                                                        alt={comentario.nombre}
-                                                                        className="rounded-circle"
-                                                                        style={{ width: '40px', height: '40px', objectFit: 'cover' }}
-                                                                    />
-                                                                    <div>
-                                                                        <h6 className="mb-0 fw-bold" style={{ color: 'var(--azul-intermedio)' }}>{comentario.nombre}</h6>
-                                                                        <small className="text-muted">{comentario.fecha}</small>
-                                                                    </div>
-                                                                </div>
-
-                                                                {comentario.userId === user.sub && (
-                                                                    <div className="d-flex gap-2">
-                                                                        <button onClick={() => startEditing(comentario)} className="btn btn-sm btn-outline-primary rounded-circle">Edit</button>
-                                                                        <button onClick={() => eliminarComentario(comentario.id)} className="btn btn-sm btn-outline-danger rounded-circle">Remove</button>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-
-                                                            <p className="mb-0 text-dark">{comentario.texto}</p>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+            <div className="container-md pt-4 pb-5">
+                <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-primary">
+                    <h1 className="display-4 text-primary mb-0">
+                        Plataforma de Publicaciones
+                    </h1>
+                    <div className="d-flex align-items-center">
+                        <img 
+                            src={user.picture} 
+                            alt={user.name}
+                            className="rounded-circle me-2"
+                            style={{ width: '50px', height: '50px' }}
+                        />
+                        <div>
+                            <div className="fw-bold">{user.name}</div>
+                            <small className="text-muted">{user.email}</small>
                         </div>
                     </div>
                 </div>
-            </div>
 
+                {/* Formulario de Nueva Publicación */}
+                <section id="form-section" className="card shadow-lg mb-5 border-top border-5 border-primary">
+                    <div className="card-body p-4 p-md-5">
+                        <h2 className="card-title h4 text-secondary mb-4">
+                            <i className="fas fa-feather-alt me-2 text-primary"></i>
+                            Crear Nuevo Post
+                        </h2>
+                        
+                        {error && (
+                            <div className="alert alert-danger" role="alert">
+                                <strong>Error:</strong> {error}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit}>
+                            <div className="mb-3">
+                                <label className="form-label fw-bold">
+                                    Publicando como:
+                                </label>
+                                <div className="d-flex align-items-center p-3 bg-light rounded">
+                                    <img 
+                                        src={user.picture} 
+                                        alt={user.name}
+                                        className="rounded-circle me-2"
+                                        style={{ width: '40px', height: '40px' }}
+                                    />
+                                    <div>
+                                        <div className="fw-bold text-primary">{user.name}</div>
+                                        <small className="text-muted">{user.email}</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="content" className="form-label">
+                                    Contenido del Post
+                                </label>
+                                <textarea
+                                    id="content"
+                                    name="content"
+                                    value={content}
+                                    onChange={handleContentChange}
+                                    rows="4"
+                                    className="form-control"
+                                    placeholder="¿Qué quieres compartir hoy?"
+                                    required
+                                ></textarea>
+                            </div>
+                            
+                            <div className="mt-4">
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary btn-lg shadow"
+                                >
+                                    <i className="fas fa-paper-plane me-2"></i>
+                                    Publicar Post
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                {/* Lista de Posts */}
+                <h2 className="h3 text-secondary mb-4 pb-2 border-bottom">
+                    Posts Creados ({posts.length})
+                </h2>
+                
+                {posts.length === 0 ? (
+                    <div className="text-center p-5 bg-white rounded shadow-sm text-muted">
+                        Aún no hay publicaciones. ¡Sé el primero en crear uno!
+                    </div>
+                ) : (
+                    <div className="row g-4">
+                        {posts.map((post) => (
+                            <div key={post.id} className="col-12">
+                                <PostItem post={post} />
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+            
             <Footer />
-        </>
+        </div>
     );
-}
+};
+
+export default Posts;
