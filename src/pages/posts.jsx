@@ -315,7 +315,7 @@ const Posts = () => {
             <section id="home" className="hero">
                 <video id="heroVideo" className="hero-media" autoPlay muted loop playsInline poster="Images/HeroImages/posts.jpg"></video>
                 <div className="hero-overlay container text-center">
-                    <h1 className="hero-title">Posts</h1>
+                    <h1 className="hero-title">Community posts</h1>
                     <p className="hero-sublead">Tell your story and connect with others</p>
                 </div>
             </section>

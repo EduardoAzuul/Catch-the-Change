@@ -2,59 +2,41 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-// ==================== MODELO DE POST ====================
+// ==================== POST MODEL ====================
 
 const postSchema = new mongoose.Schema({
-    author: {
-        type: String,
-        required: true
-    },
-    authorEmail: {
-        type: String,
-        required: true
-    },
-    authorPicture: {
-        type: String,
-        required: true
-    },
-    text: {
-        type: String,
-        required: true
-    },
-    userId: {
-        type: String,
-        required: true
-    }
-}, {
-    timestamps: true // Crea automáticamente createdAt y updatedAt
-});
+    author: { type: String, required: true },
+    authorEmail: { type: String, required: true },
+    authorPicture: { type: String, required: true },
+    text: { type: String, required: true },
+    userId: { type: String, required: true }
+}, { timestamps: true });
 
 const Post = mongoose.model('Post', postSchema);
 
-console.log('📝 Modelo Post cargado correctamente');
+console.log('📝 Post model loaded successfully');
 
-// ==================== RUTAS ====================
+// ==================== ROUTES ====================
 
-// GET - Obtener todos los posts
+// GET - Get all posts
 router.get('/', async (req, res) => {
     try {
-        console.log('📥 Petición GET /api/posts - Obteniendo todos los posts...');
+        console.log('📥 GET /api/posts request - fetching all posts...');
         
         const posts = await Post.find()
-            .sort({ createdAt: -1 }) // Más recientes primero
-            .limit(100); // Limitar a 100 posts
+            .sort({ createdAt: -1 })
+            .limit(100);
 
-        console.log(`✅ Posts obtenidos de MongoDB: ${posts.length} documentos`);
+        console.log(`✅ Posts fetched from MongoDB: ${posts.length} documents`);
         
         if (posts.length > 0) {
-            console.log('📄 Primer post:', {
+            console.log('📄 First post preview:', {
                 id: posts[0]._id,
                 author: posts[0].author,
                 text: posts[0].text.substring(0, 50) + '...'
             });
         }
 
-        // Formatear la fecha para el frontend
         const formattedPosts = posts.map(post => ({
             id: post._id.toString(),
             author: post.author,
@@ -62,36 +44,31 @@ router.get('/', async (req, res) => {
             authorPicture: post.authorPicture,
             text: post.text,
             userId: post.userId,
-            date: new Date(post.createdAt).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+            date: new Date(post.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
             }),
             createdAt: post.createdAt,
             updatedAt: post.updatedAt
         }));
 
-        console.log(`📤 Enviando ${formattedPosts.length} posts formateados al frontend`);
+        console.log(`📤 Sending ${formattedPosts.length} formatted posts to frontend`);
         res.json(formattedPosts);
     } catch (error) {
-        console.error('❌ Error al obtener posts:', error);
+        console.error('❌ Error fetching posts:', error);
         console.error('Stack trace:', error.stack);
-        res.status(500).json({ error: 'Error al obtener los posts' });
+        res.status(500).json({ error: 'Error fetching posts' });
     }
 });
 
-// GET - Obtener posts de un usuario específico
+// GET - Get posts by user
 router.get('/user/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
-        console.log(`📥 Petición GET /api/posts/user/${userId} - Obteniendo posts del usuario...`);
+        console.log(`📥 GET /api/posts/user/${userId} request - fetching user posts...`);
         
-        const posts = await Post.find({ userId })
-            .sort({ createdAt: -1 });
-
-        console.log(`✅ Posts del usuario ${userId} obtenidos de MongoDB: ${posts.length} documentos`);
+        const posts = await Post.find({ userId }).sort({ createdAt: -1 });
+        console.log(`✅ User ${userId} posts fetched: ${posts.length} documents`);
 
         const formattedPosts = posts.map(post => ({
             id: post._id.toString(),
@@ -100,31 +77,28 @@ router.get('/user/:userId', async (req, res) => {
             authorPicture: post.authorPicture,
             text: post.text,
             userId: post.userId,
-            date: new Date(post.createdAt).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+            date: new Date(post.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
             }),
             createdAt: post.createdAt,
             updatedAt: post.updatedAt
         }));
 
-        console.log(`📤 Enviando ${formattedPosts.length} posts del usuario al frontend`);
+        console.log(`📤 Sending ${formattedPosts.length} user posts to frontend`);
         res.json(formattedPosts);
     } catch (error) {
-        console.error('❌ Error al obtener posts del usuario:', error);
+        console.error('❌ Error fetching user posts:', error);
         console.error('Stack trace:', error.stack);
-        res.status(500).json({ error: 'Error al obtener los posts del usuario' });
+        res.status(500).json({ error: 'Error fetching user posts' });
     }
 });
 
-// POST - Crear un nuevo post
+// POST - Create new post
 router.post('/', async (req, res) => {
     try {
-        console.log('📥 Petición POST /api/posts - Creando nuevo post...');
-        console.log('📦 Datos recibidos:', {
+        console.log('📥 POST /api/posts request - creating new post...');
+        console.log('📦 Received data:', {
             author: req.body.author,
             authorEmail: req.body.authorEmail,
             textLength: req.body.text?.length,
@@ -133,32 +107,21 @@ router.post('/', async (req, res) => {
 
         const { author, authorEmail, authorPicture, text, userId } = req.body;
 
-        // Validación
         if (!author || !authorEmail || !authorPicture || !text || !userId) {
-            console.log('❌ Faltan campos requeridos');
-            console.log('Campos recibidos:', { 
-                author: !!author, 
-                authorEmail: !!authorEmail, 
-                authorPicture: !!authorPicture, 
-                text: !!text, 
-                userId: !!userId 
+            console.log('❌ Missing required fields', { 
+                author: !!author, authorEmail: !!authorEmail, 
+                authorPicture: !!authorPicture, text: !!text, userId: !!userId 
             });
-            return res.status(400).json({ 
-                error: 'Faltan campos requeridos',
-                received: { author, authorEmail, authorPicture, text, userId }
-            });
+            return res.status(400).json({ error: 'Missing required fields' });
         }
 
         if (text.trim().length === 0) {
-            console.log('❌ El texto del post está vacío');
-            return res.status(400).json({ 
-                error: 'El contenido del post no puede estar vacío' 
-            });
+            console.log('❌ Post text is empty');
+            return res.status(400).json({ error: 'Post content cannot be empty' });
         }
 
-        console.log('✅ Validación de datos completada');
+        console.log('✅ Data validation passed');
 
-        // Crear el post
         const newPost = new Post({
             author: author.trim(),
             authorEmail: authorEmail.trim(),
@@ -167,28 +130,10 @@ router.post('/', async (req, res) => {
             userId
         });
 
-        console.log('💾 Guardando post en MongoDB...');
+        console.log('💾 Saving post to MongoDB...');
         await newPost.save();
-        console.log('✅ Post guardado exitosamente en MongoDB');
-        console.log('📄 ID del post:', newPost._id.toString());
-        console.log('📄 Detalles del post guardado:', {
-            id: newPost._id,
-            author: newPost.author,
-            authorEmail: newPost.authorEmail,
-            textPreview: newPost.text.substring(0, 50) + (newPost.text.length > 50 ? '...' : ''),
-            userId: newPost.userId,
-            createdAt: newPost.createdAt
-        });
+        console.log('✅ Post saved successfully', { id: newPost._id });
 
-        // Verificar que se guardó en la base de datos
-        const verifyPost = await Post.findById(newPost._id);
-        if (verifyPost) {
-            console.log('✅ Verificación: Post encontrado en MongoDB después de guardar');
-        } else {
-            console.log('⚠️ Advertencia: Post no encontrado en MongoDB después de guardar');
-        }
-
-        // Devolver el post formateado
         const formattedPost = {
             id: newPost._id.toString(),
             author: newPost.author,
@@ -196,94 +141,66 @@ router.post('/', async (req, res) => {
             authorPicture: newPost.authorPicture,
             text: newPost.text,
             userId: newPost.userId,
-            date: new Date(newPost.createdAt).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+            date: new Date(newPost.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
             }),
             createdAt: newPost.createdAt,
             updatedAt: newPost.updatedAt
         };
 
-        console.log('📤 Enviando post formateado al frontend');
-        console.log('🎉 Post creado exitosamente por:', author);
+        console.log('📤 Sending formatted post to frontend');
+        console.log('🎉 Post successfully created by:', author);
         res.status(201).json(formattedPost);
     } catch (error) {
-        console.error('❌ Error al crear post:', error);
+        console.error('❌ Error creating post:', error);
         console.error('Stack trace:', error.stack);
-        res.status(500).json({ 
-            error: 'Error al crear el post',
-            details: error.message 
-        });
+        res.status(500).json({ error: 'Error creating post', details: error.message });
     }
 });
 
-// PUT - Actualizar un post
+// PUT - Update a post
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { text, userId } = req.body;
 
-        console.log(`📥 Petición PUT /api/posts/${id} - Actualizando post...`);
-        console.log('📦 Datos recibidos:', {
-            postId: id,
-            userId: userId,
-            newTextLength: text?.length
-        });
+        console.log(`📥 PUT /api/posts/${id} request - updating post...`);
+        console.log('📦 Received data:', { postId: id, userId, newTextLength: text?.length });
 
-        // Validar ID de MongoDB
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            console.log('❌ ID de post inválido:', id);
-            return res.status(400).json({ error: 'ID de post inválido' });
+            console.log('❌ Invalid post ID:', id);
+            return res.status(400).json({ error: 'Invalid post ID' });
         }
 
-        // Validación
         if (!text || text.trim().length === 0) {
-            console.log('❌ El texto del post está vacío');
-            return res.status(400).json({ 
-                error: 'El contenido del post no puede estar vacío' 
-            });
+            console.log('❌ Post text is empty');
+            return res.status(400).json({ error: 'Post content cannot be empty' });
         }
 
-        console.log('🔍 Buscando post en MongoDB...');
-        // Buscar el post
+        console.log('🔍 Searching post in MongoDB...');
         const post = await Post.findById(id);
 
         if (!post) {
-            console.log('❌ Post no encontrado en MongoDB');
-            return res.status(404).json({ error: 'Post no encontrado' });
+            console.log('❌ Post not found');
+            return res.status(404).json({ error: 'Post not found' });
         }
 
-        console.log('✅ Post encontrado en MongoDB');
-        console.log('📄 Post actual:', {
-            id: post._id,
-            author: post.author,
-            userId: post.userId
-        });
+        console.log('✅ Post found', { id: post._id, author: post.author });
 
-        // Verificar que el usuario sea el propietario
         if (post.userId !== userId) {
-            console.log(`❌ Permiso denegado: Usuario ${userId} intentó editar post de ${post.userId}`);
-            return res.status(403).json({ 
-                error: 'No tienes permiso para editar este post' 
-            });
+            console.log(`❌ Permission denied: User ${userId} tried to edit post of ${post.userId}`);
+            return res.status(403).json({ error: 'Not authorized to edit this post' });
         }
 
-        console.log('✅ Usuario verificado como propietario');
+        console.log('✅ User verified as owner');
 
-        // Actualizar
         const oldText = post.text;
         post.text = text.trim();
         
-        console.log('💾 Guardando cambios en MongoDB...');
+        console.log('💾 Saving changes to MongoDB...');
         await post.save();
-        console.log('✅ Post actualizado exitosamente en MongoDB');
-        console.log('📝 Cambio realizado:', {
-            oldTextPreview: oldText.substring(0, 30) + '...',
-            newTextPreview: post.text.substring(0, 30) + '...'
-        });
+        console.log('✅ Post updated', { oldTextPreview: oldText.substring(0, 30) + '...', newTextPreview: post.text.substring(0, 30) + '...' });
 
         const formattedPost = {
             id: post._id.toString(),
@@ -292,102 +209,68 @@ router.put('/:id', async (req, res) => {
             authorPicture: post.authorPicture,
             text: post.text,
             userId: post.userId,
-            date: new Date(post.createdAt).toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+            date: new Date(post.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
             }),
             createdAt: post.createdAt,
             updatedAt: post.updatedAt
         };
 
-        console.log(`📤 Enviando post actualizado al frontend`);
+        console.log('📤 Sending updated post to frontend');
         res.json(formattedPost);
     } catch (error) {
-        console.error('❌ Error al actualizar post:', error);
+        console.error('❌ Error updating post:', error);
         console.error('Stack trace:', error.stack);
-        res.status(500).json({ 
-            error: 'Error al actualizar el post',
-            details: error.message 
-        });
+        res.status(500).json({ error: 'Error updating post', details: error.message });
     }
 });
 
-// DELETE - Eliminar un post
+// DELETE - Delete a post
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { userId } = req.body;
 
-        console.log(`📥 Petición DELETE /api/posts/${id} - Eliminando post...`);
-        console.log('📦 Usuario solicitante:', userId);
+        console.log(`📥 DELETE /api/posts/${id} request - deleting post...`);
+        console.log('📦 Requesting user:', userId);
 
-        // Validar ID de MongoDB
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            console.log('❌ ID de post inválido:', id);
-            return res.status(400).json({ error: 'ID de post inválido' });
+            console.log('❌ Invalid post ID:', id);
+            return res.status(400).json({ error: 'Invalid post ID' });
         }
 
-        console.log('🔍 Buscando post en MongoDB...');
-        // Buscar el post
+        console.log('🔍 Searching post in MongoDB...');
         const post = await Post.findById(id);
 
         if (!post) {
-            console.log('❌ Post no encontrado en MongoDB');
-            return res.status(404).json({ error: 'Post no encontrado' });
+            console.log('❌ Post not found');
+            return res.status(404).json({ error: 'Post not found' });
         }
 
-        console.log('✅ Post encontrado en MongoDB');
-        console.log('📄 Post a eliminar:', {
-            id: post._id,
-            author: post.author,
-            userId: post.userId,
-            textPreview: post.text.substring(0, 30) + '...'
-        });
+        console.log('✅ Post found', { id: post._id, author: post.author });
 
-        // Verificar que el usuario sea el propietario
         if (post.userId !== userId) {
-            console.log(`❌ Permiso denegado: Usuario ${userId} intentó eliminar post de ${post.userId}`);
-            return res.status(403).json({ 
-                error: 'No tienes permiso para eliminar este post' 
-            });
+            console.log(`❌ Permission denied: User ${userId} tried to delete post of ${post.userId}`);
+            return res.status(403).json({ error: 'Not authorized to delete this post' });
         }
 
-        console.log('✅ Usuario verificado como propietario');
-        console.log('🗑️ Eliminando post de MongoDB...');
-        
+        console.log('✅ User verified as owner');
+        console.log('🗑️ Deleting post from MongoDB...');
         await Post.findByIdAndDelete(id);
-        
-        console.log('✅ Post eliminado exitosamente de MongoDB');
-        
-        // Verificar que se eliminó
-        const verifyDeleted = await Post.findById(id);
-        if (!verifyDeleted) {
-            console.log('✅ Verificación: Post ya no existe en MongoDB');
-        } else {
-            console.log('⚠️ Advertencia: Post todavía existe en MongoDB después de eliminarlo');
-        }
+        console.log('✅ Post deleted successfully');
 
-        console.log(`📤 Confirmación de eliminación enviada al frontend`);
-        res.json({ 
-            message: 'Post eliminado exitosamente', 
-            id 
-        });
+        console.log('📤 Sending deletion confirmation to frontend');
+        res.json({ message: 'Post deleted successfully', id });
     } catch (error) {
-        console.error('❌ Error al eliminar post:', error);
+        console.error('❌ Error deleting post:', error);
         console.error('Stack trace:', error.stack);
-        res.status(500).json({ 
-            error: 'Error al eliminar el post',
-            details: error.message 
-        });
+        res.status(500).json({ error: 'Error deleting post', details: error.message });
     }
 });
 
-// Log al cargar el módulo
-console.log('✅ Rutas de posts cargadas correctamente');
-console.log('📋 Rutas disponibles:');
+console.log('✅ Post routes loaded successfully');
+console.log('📋 Available routes:');
 console.log('   GET    /api/posts');
 console.log('   GET    /api/posts/user/:userId');
 console.log('   POST   /api/posts');
