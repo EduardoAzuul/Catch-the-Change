@@ -10,6 +10,7 @@ const { getEconomicZone } = require("./api/economicZoneLayer");
 const { getProtectedAreas1 } = require("./api/protectedAreas1Layer");
 const { getProtectedAreas2 } = require("./api/protectedAreas2Layer");
 const postsRoutes = require("./api/posts");
+const contactUsRoutes = require("./api/contactUs");
 
 const app = express();
 const PORT = process.env.PORT || 4000;

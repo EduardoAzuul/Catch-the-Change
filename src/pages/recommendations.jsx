@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { style } from 'react-dom';
 
 import Header from '../components/header.jsx';
 import Footer from '../components/footer.jsx';
 import Modal from '../components/formModal.jsx';
+import contactUS from './contactUS.jsx';
 
 import '../css/style_recom.css';
 import scrollFade from '../js/scrollFade.js';
@@ -14,7 +14,7 @@ function Recommendations() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({});
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const data = {
@@ -23,33 +23,17 @@ function Recommendations() {
             subject: e.target.subject.value,
             message: e.target.message.value
         };
-        
-        setFormData(data); // Store data to display in modal
-        setIsModalOpen(true); // Open the modal
-        e.target.reset();
 
-        /*
-        try { //converts the info to json file and sends it to the server
-            const response = await fetch('/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-            });
-
-            const result = await response.json();//saves the server response
-
-            if (result.success) {
-                modal.show();//the modal from bootstrap is opened
-                modalTitle.textContent = "Message Sent!";
-                modalMessage.textContent = "Thanks for reaching out! We'll get back to you soon :)";
-            }
+       try {
+            // send to server (saves to DB and triggers email)
+            await contactUS(data);
+            setFormData(data);
+            setIsModalOpen(true);
+            e.target.reset();
         } catch (err) {
-            modal.show();//the modal from bootstrap is opened
-            modalTitle.textContent = "Oops!";
-            modalMessage.textContent = "Something went wrong. Please try again later.";
+            console.error('Error sending contact:', err);
+            alert('There was an error sending your message. Please try again later.');
         }
-        */
-
     };
 
     const handleCloseModal = () => {
@@ -93,9 +77,9 @@ function Recommendations() {
                                 Marine life depends on our actions. Here you will find sustainable fishing practices and regulations that
                                 help to protect oceans and their species.
                             </p>
-                            <h2 className="centered-heading mh2" style={{color:"#0077b6", fontSize: '25px', fontFamily: "system-ui"}}>Catch the change</h2> <br />
+                            <h2 className="centered-heading mh2" style={{ color: "#0077b6", fontSize: '25px', fontFamily: "system-ui" }}>Catch the change</h2> <br />
 
-                            <h2 className="mh2" style={{color:"#0077b6", fontSize: '25px', fontFamily: "system-ui"}}>Sustainable fishing practices</h2>
+                            <h2 className="mh2" style={{ color: "#0077b6", fontSize: '25px', fontFamily: "system-ui" }}>Sustainable fishing practices</h2>
                             <ul>
                                 <li> Fish in specific seasons based on tides and the moon, so that species have time to reproduce.</li>
                                 <li> Respect protected areas and do not fish in that area.</li>
@@ -106,7 +90,7 @@ function Recommendations() {
                                 <li> Consume only from well-managed and sustainable fisheries</li>
                             </ul>
 
-                            <h2 className="mh2" style={{color:"#0077b6", fontSize: '25px', fontFamily: "system-ui"}}>Complying to regulations</h2>
+                            <h2 className="mh2" style={{ color: "#0077b6", fontSize: '25px', fontFamily: "system-ui" }}>Complying to regulations</h2>
                             <p>
                                 When fishing, it is important to be aware of the regulations in your location.
                                 The official website of the area should have a section about them.
@@ -126,7 +110,7 @@ function Recommendations() {
                                 </div>
 
                             </div>
-                            <h2 style={{color:"#0077b6", fontSize: '25px', fontFamily: "system-ui"}}>Organizations</h2>
+                            <h2 style={{ color: "#0077b6", fontSize: '25px', fontFamily: "system-ui" }}>Organizations</h2>
                             <div>
                                 <div className="ORG1">
                                     <a href="https://www.seafoodwatch.org/recommendations" target="_blank">
@@ -173,7 +157,7 @@ function Recommendations() {
                             </div>
                         </div>
                         <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-                            <h5 className="modal-title" id="Modal_head">Message Sent</h5><br/>
+                            <h5 className="modal-title" id="Modal_head">Message Sent</h5><br />
                             <p>Thanks for reaching out! We'll get back to you ASAP!</p>
                             <p>Your email: {formData.email}</p>
                         </Modal>
@@ -184,7 +168,6 @@ function Recommendations() {
             <Footer />
 
         </React.Fragment>
-
     );
 };
 
