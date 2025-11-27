@@ -6,7 +6,7 @@ const economiczone = mongoose.model('economiczone', economiczoneSchema);
 export async function getEconomicZone(req, res) {
   try {
 
-    const getEconomicZone = await economiczone.find();
+    const getEconomicZone = await economiczone.find().lean();
 
     res.status(200).json(getEconomicZone);
   } catch (err) {

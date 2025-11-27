@@ -10,6 +10,7 @@ const { getProtectedAreas2 } = require("./api/protectedAreas2Layer");
 
 // 👉 Importa tus rutas de posts
 const postsRoutes = require("./api/posts");
+const contactUsRoutes = require("./api/contactUs");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -37,6 +38,7 @@ mongoose
 
         // --- Rutas nuevas para posts ---
         app.use("/api/posts", postsRoutes);
+        app.use("/api/contactUs", contactUsRoutes);
     })
     .catch((err) => {
         console.error("MongoDB connection error:", err);

@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 
 export default function FishingMap() {
     const leafletInstance = useRef(null);
+    const url = process.env.REACT_APP_API_URL?.replace(/\/$/, '');
     const [loading, setLoading] = useState(true);
     const [loadingProgress, setLoadingProgress] = useState(0);
 
@@ -18,7 +19,7 @@ export default function FishingMap() {
         // Fetch MongoDB marker data
         const fetcheconomicZoneLayer = async () => {
             try {
-                const res = await fetch("http://localhost:4000/api/economicZoneLayer");
+                const res = await fetch(`${url}/economicZoneLayer`);
                 const data = await res.json();
                 setLoadingProgress(33);
 
@@ -47,7 +48,7 @@ export default function FishingMap() {
 
         const fetchprotectedAreas1Layer = async () => {
             try {
-                const res = await fetch("http://localhost:4000/api/protectedAreas1Layer");
+                const res = await fetch(`${url}/protectedAreas1Layer`);
                 const data = await res.json();
                 setLoadingProgress(66);
 
@@ -76,7 +77,7 @@ export default function FishingMap() {
 
         const fetchprotectedAreas2Layer = async () => {
             try {
-                const res = await fetch("http://localhost:4000/api/protectedAreas2Layer");
+                const res = await fetch(`${url}/protectedAreas2Layer`);
                 const data = await res.json();
                 setLoadingProgress(100);
 

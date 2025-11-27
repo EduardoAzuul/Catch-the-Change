@@ -6,7 +6,7 @@ const protectedareas2 = mongoose.model('protectedareas2', protectedareas2Schema)
 export async function getProtectedAreas2(req, res) {
   try {
 
-    const getProtectedAreas2 = await protectedareas2.find();
+    const getProtectedAreas2 = await protectedareas2.find().lean()
 
     res.status(200).json(getProtectedAreas2);
   } catch (err) {

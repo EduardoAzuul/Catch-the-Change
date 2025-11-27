@@ -32,6 +32,7 @@ router.post("/", async (req, res) => {
 
     try {
         const nuevoPost = new Post({
+            id: req.body.id,
             nombre: req.body.nombre,
             email: req.body.email,
             picture: req.body.picture,
@@ -61,8 +62,7 @@ router.put("/:id", async (req, res) => {
     console.log("Nuevo texto recibido:", req.body.texto);
 
     try {
-        const updatedPost = await Post.findByIdAndUpdate(
-            req.params.id,
+        const updatedPost = await Post.findOneAndUpdate({ "id": Number(req.params.id) },
             { texto: req.body.texto },
             { new: true }
         );
@@ -82,7 +82,7 @@ router.delete("/:id", async (req, res) => {
     console.log(`📥 [DELETE] /api/posts/${req.params.id}`);
 
     try {
-        await Post.findByIdAndDelete(req.params.id);
+        await Post.findOneAndDelete({ "id": Number(req.params.id) });
         console.log("🗑️ [DELETE] Post eliminado correctamente");
         res.json({ message: "Post deleted" });
     } catch (err) {

@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 
 import Header from '../components/header.jsx';
 import Footer from '../components/footer.jsx';
-
+import { setPost } from './postsDB.jsx';
+import { updatePost } from './postsDB.jsx';
+import { deletePost } from './postsDB.jsx';
+import { getPosts } from './postsDB.jsx';
 
 import '../css/post.css'; 
 import scrollFade from '../js/scrollFade.js';
@@ -133,7 +136,7 @@ export default function ComentariosApp() {
         }
     }, [comentarios]);
 
-    const agregarComentario = () => {
+    const agregarComentario = async () =>  {
         if (!nuevoComentario.trim()) return;
 
         const comentario = {
@@ -148,10 +151,13 @@ export default function ComentariosApp() {
 
         setComentarios([comentario, ...comentarios]);
         setNuevoComentario('');
+        await setPost(comentario); // Guarda en la base de datos
     };
 
-    const eliminarComentario = (id) => {
+    const eliminarComentario = async (id) => {
+        console.log("Eliminando comentario con ID:", id);
         setComentarios(comentarios.filter(c => c.id !== id));
+        await deletePost(id); // Elimina de la base de datos
     };
 
     const startEditing = (comment) => {
@@ -164,10 +170,12 @@ export default function ComentariosApp() {
         setEditingText('');
     };
 
-    const saveEdit = (id) => {
+    const saveEdit = async (id) => {
+
         setComentarios(comentarios.map(c =>
             c.id === id ? { ...c, texto: editingText } : c
         ));
+        await updatePost(id, editingText);
         cancelEditing();
     };
 
@@ -254,7 +262,7 @@ export default function ComentariosApp() {
 
                             {/* Título de la Sección de Comentarios */}
                             <div className="text-center mb-5">
-                                <h2 className="mh2">Coments</h2>
+                                <h2 className="mh2">Comments</h2>
                                 <p className="text-muted">Join Conversation</p>
                             </div>
 

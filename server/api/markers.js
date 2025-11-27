@@ -6,7 +6,7 @@ const endagered = mongoose.model('iucnredmex', endageredSchema);
 export async function getMarkers(req, res) {
   try {
 
-    const markers = await endagered.find();
+    const markers = await endagered.find().lean();
 
     res.status(200).json(markers);
   } catch (err) {
