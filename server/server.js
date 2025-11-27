@@ -12,6 +12,7 @@ const { getProtectedAreas2 } = require("./api/protectedAreas2Layer");
 const postsRoutes = require("./api/posts");
 const contactUsRoutes = require("./api/contactUs");
 
+
 const app = express();
 const PORT = process.env.PORT || 4000;
 
@@ -175,11 +176,14 @@ app.put("/api/user/profile", authenticateToken, async (req, res) => {
 
 // ==================== OTHER ROUTES ====================
 
+
+
 app.get("/api/markers", getMarkers);
 app.get("/api/economicZoneLayer", getEconomicZone);
 app.get("/api/protectedAreas1Layer", getProtectedAreas1);
 app.get("/api/protectedAreas2Layer", getProtectedAreas2);
 app.use("/api/posts", postsRoutes);
+app.use("/api/contactUs", contactUsRoutes);
 
 // ==================== START SERVER ====================
 

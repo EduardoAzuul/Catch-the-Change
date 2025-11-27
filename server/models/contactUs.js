@@ -4,18 +4,22 @@ const contactUsSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        unique: false
+        trim: true
     },
     email: {
         type: String,
-        required: false,
+        required: true,
+        trim: true
     },
     message: {
         type: String,
-        required: false
+        required: true,
+        trim: true
     }
-}, { timestamps: true });
+}, { 
+    timestamps: true 
+});
 
-const ContactUsModel = mongoose.model('ContactUS', contactUsSchema);
+const ContactUsModel = mongoose.model('ContactUs', contactUsSchema);
 
 module.exports = ContactUsModel;
