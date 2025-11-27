@@ -6,6 +6,8 @@ import "../css/profile.css"; // tu CSS personalizado
 import Header from '../components/header.jsx';
 import Footer from '../components/footer.jsx';
 
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 export default function Profile() {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);

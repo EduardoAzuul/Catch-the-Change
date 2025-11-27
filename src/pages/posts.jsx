@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../js/AuthContext';
+
 import Header from '../components/header.jsx';
 import Footer from '../components/footer.jsx';
 
-const API_URL = "http://localhost:4000/api";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '../css/post.css'; 
+
+const API_URL = process.env.REACT_APP_API_URL ||"http://localhost:4000/api";
+
 
 // --- COMPONENTE PRINCIPAL (Posts) ---
 const Posts = () => {
@@ -16,6 +21,8 @@ const Posts = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    
+    
     // Verificar que el usuario esté autenticado
     useEffect(() => {
         if (!user) {
@@ -260,13 +267,13 @@ const Posts = () => {
                                         onClick={() => setIsEditing(true)}
                                         className="btn btn-primary btn-sm"
                                     >
-                                        <i className="fas fa-edit me-1"></i> Editar
+                                        <i className="fas fa-edit me-1"></i> Edit
                                     </button>
                                     <button
                                         onClick={handleDelete}
                                         className="btn btn-danger btn-sm"
                                     >
-                                        <i className="fas fa-trash-alt me-1"></i> Eliminar
+                                        <i className="fas fa-trash-alt me-1"></i> Delete
                                     </button>
                                 </>
                             )}
@@ -294,13 +301,26 @@ const Posts = () => {
 
     return (
         <div className="bg-light min-vh-100">
+            <meta charSet="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Posts</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"></link>
+            <link rel="preconnect" href="https://fonts.googleapis.com"></link>
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true"></link>
+            <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Raleway:ital@0;1&family=Sacramento&display=swap" rel="stylesheet"></link>
+            <link rel="icon" href="images/logo.png" type="image/x-icon"></link>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
             <Header />
 
+            <section id="home" className="hero">
+                <video id="heroVideo" className="hero-media" autoPlay muted loop playsInline poster="Images/HeroImages/posts.jpg"></video>
+                <div className="hero-overlay container text-center">
+                    <h1 className="hero-title">Posts</h1>
+                    <p className="hero-sublead">Tell your story and connect with others</p>
+                </div>
+            </section>
             <div className="container-md pt-4 pb-5">
                 <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-primary">
-                    <h1 className="display-4 text-primary mb-0">
-                        Plataforma de Publicaciones
-                    </h1>
                     <div className="d-flex align-items-center">
                         <img 
                             src={user.picture} 
@@ -320,7 +340,7 @@ const Posts = () => {
                     <div className="card-body p-4 p-md-5">
                         <h2 className="card-title h4 text-secondary mb-4">
                             <i className="fas fa-feather-alt me-2 text-primary"></i>
-                            Crear Nuevo Post
+                            Create a New Post
                         </h2>
                         
                         {error && (
@@ -332,7 +352,7 @@ const Posts = () => {
                         <form onSubmit={handleSubmit}>
                             <div className="mb-3">
                                 <label className="form-label fw-bold">
-                                    Publicando como:
+                                    Publishing as:
                                 </label>
                                 <div className="d-flex align-items-center p-3 bg-light rounded">
                                     <img 
@@ -350,7 +370,7 @@ const Posts = () => {
 
                             <div className="mb-3">
                                 <label htmlFor="content" className="form-label">
-                                    Contenido del Post
+                                    Content:
                                 </label>
                                 <textarea
                                     id="content"
@@ -359,7 +379,7 @@ const Posts = () => {
                                     onChange={handleContentChange}
                                     rows="4"
                                     className="form-control"
-                                    placeholder="¿Qué quieres compartir hoy?"
+                                    placeholder="What are you thinking?"
                                     required
                                 ></textarea>
                             </div>
@@ -370,21 +390,18 @@ const Posts = () => {
                                     className="btn btn-primary btn-lg shadow"
                                 >
                                     <i className="fas fa-paper-plane me-2"></i>
-                                    Publicar Post
+                                    Publish
                                 </button>
                             </div>
                         </form>
                     </div>
                 </section>
 
-                {/* Lista de Posts */}
-                <h2 className="h3 text-secondary mb-4 pb-2 border-bottom">
-                    Posts Creados ({posts.length})
-                </h2>
+                
                 
                 {posts.length === 0 ? (
                     <div className="text-center p-5 bg-white rounded shadow-sm text-muted">
-                        Aún no hay publicaciones. ¡Sé el primero en crear uno!
+                        There are no posts yet. Be the first to create one!
                     </div>
                 ) : (
                     <div className="row g-4">
