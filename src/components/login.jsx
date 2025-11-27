@@ -23,7 +23,7 @@ export default function Login() {
     useEffect(() => {
         // Cargar el script de Google
         const script = document.createElement("script");
-        script.src = "https://accounts.google.com/gsi/client";
+        script.src = "https://accounts.google.com/gsi/client?hl=en";
         script.async = true;
         document.body.appendChild(script);
 
@@ -33,12 +33,15 @@ export default function Login() {
                 callback: handleGoogleResponse
             });
 
+             const btn= document.getElementById("googleLoginBtn");
+                
             window.google.accounts.id.renderButton(
-                document.getElementById("googleLoginBtn"),
+                btn,
                 {
                     theme: "filled_blue",
                     size: "large",
-                    shape: "pill"
+                    shape: "pill",
+                    locale: "en"
                 }
             );
         };
@@ -58,16 +61,13 @@ export default function Login() {
 
             if (!res.ok) throw new Error(data.error);
 
-            // Guardar en localStorage (como antes)
             localStorage.setItem("token", data.token);
             
-            // IMPORTANTE: Guardar también en el contexto para que persista la sesión
             login({
                 ...data.user,
-                token: data.token // Incluir el token si lo necesitas en otros componentes
+                token: data.token 
             });
 
-            // Redirigir a donde el usuario intentaba ir o al profile
             navigate(from, { replace: true });
 
         } catch (err) {
@@ -91,7 +91,21 @@ export default function Login() {
             <Header />
 
             <div className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
-                <div id="googleLoginBtn"></div>
+                <div className="card shadow-lg p-4 tarjeta" style={{ width: "400px", borderRadius: "20px", backgroundColor: "#3989bf" }}>
+
+                    <div className="text-center mb-3">
+                        <img 
+                            src="/images/logo.png" 
+                            alt="Logo" 
+                            style={{ width: "100px", height: "100px", objectFit: "contain" }} 
+                        />
+                    </div> 
+
+                    <h3 className="text-center mb-4" style={{ fontFamily: "Montserrat, sans-serif", color: "white" }}>
+                    Welcome to the community
+                    </h3>      
+                    <div id="googleLoginBtn"></div>
+                </div>
             </div>
             
             <Footer />
