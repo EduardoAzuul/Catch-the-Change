@@ -58,7 +58,7 @@ export default async function contactUS(data) {
         }
 
         const result = await res.json();
-        console.log('✅ Mensaje guardado en MongoDB:', result.id);
+        console.log('message in MongoDB:', result.id);
         
         return {
             success: true,
@@ -67,11 +67,10 @@ export default async function contactUS(data) {
         };
 
     } catch (error) {
-        console.error('❌ Error en contactUS:', error);
+        console.error('Error in contactUS:', error);
         return {
             success: false,
             error: error.message,
-            message: 'Error al enviar el mensaje'
         };
     }
 }

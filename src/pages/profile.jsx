@@ -67,7 +67,7 @@ export default function Profile() {
                 onClick={handleLogout}
                 className="btn btn-danger px-4 mt-3"
                 >
-                Cerrar sesión
+                Logout
                 </button>
             </div>
             </div>
