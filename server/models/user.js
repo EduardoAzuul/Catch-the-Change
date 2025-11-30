@@ -5,7 +5,9 @@ const userSchema = new mongoose.Schema({
     name: String,
     email: String,
     picture: String,
-    createdAt: { type: Date, default: Date.now }
+    customPicture: String,
+    createdAt: { type: Date, default: Date.now },
+    lastLogin: Date
 });
 
 export default mongoose.model("User", userSchema);

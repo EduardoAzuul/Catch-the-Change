@@ -10,6 +10,20 @@ import '../css/post.css';
 
 const API_URL = process.env.REACT_APP_API_URL ||"http://localhost:4000/api";
 
+// Función helper para construir URLs de imágenes
+const getImageUrl = (picturePath) => {
+    if (!picturePath) {
+        return 'https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff&size=150';
+    }
+    
+    // Si es una URL completa (de Google), devolverla tal cual
+    if (picturePath.startsWith('http://') || picturePath.startsWith('https://')) {
+        return picturePath;
+    }
+    
+    // Si es una ruta relativa, agregar el servidor
+    return `http://localhost:4000${picturePath}`;
+};
 
 // --- COMPONENTE PRINCIPAL (Posts) ---
 const Posts = () => {
@@ -55,6 +69,8 @@ const Posts = () => {
             
             const data = await response.json();
             console.log('✅ Posts recibidos del servidor:', data.length);
+            console.log('📸 Primer post picture:', data[0]?.authorPicture);
+            console.log('📸 URL completa:', getImageUrl(data[0]?.authorPicture));
             setPosts(data);
         } catch (err) {
             console.error('❌ Error al obtener posts:', err);
@@ -80,6 +96,8 @@ const Posts = () => {
 
         try {
             console.log('📤 Enviando nuevo post al servidor...');
+            console.log('📸 User picture:', user.picture);
+            
             const response = await fetch(`${API_URL}/posts`, {
                 method: 'POST',
                 headers: {
@@ -90,7 +108,7 @@ const Posts = () => {
                     authorEmail: user.email,
                     authorPicture: user.picture,
                     text: content.trim(),
-                    userId: user.email
+                    userId: user.id || user.email // Usar user.id si existe
                 })
             });
 
@@ -101,6 +119,7 @@ const Posts = () => {
 
             const newPost = await response.json();
             console.log('✅ Post creado exitosamente:', newPost.id);
+            console.log('📸 New post picture:', newPost.authorPicture);
             
             setPosts(prevPosts => [newPost, ...prevPosts]);
             setContent('');
@@ -134,7 +153,7 @@ const Posts = () => {
                     },
                     body: JSON.stringify({
                         text: editText.trim(),
-                        userId: user.email
+                        userId: user.id || user.email
                     })
                 });
 
@@ -174,7 +193,7 @@ const Posts = () => {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        userId: user.email
+                        userId: user.id || user.email
                     })
                 });
 
@@ -203,10 +222,14 @@ const Posts = () => {
                     <div className="d-flex justify-content-between align-items-start mb-3">
                         <div className="d-flex align-items-center">
                             <img 
-                                src={post.authorPicture} 
+                                src={getImageUrl(post.authorPicture)}
                                 alt={post.author}
                                 className="rounded-circle me-2"
-                                style={{ width: '40px', height: '40px' }}
+                                style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                                onError={(e) => {
+                                    console.error('❌ Error cargando imagen del post:', post.authorPicture);
+                                    e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(post.author) + '&background=0D8ABC&color=fff&size=40';
+                                }}
                             />
                             <div>
                                 <h5 className="mb-0 text-success">
@@ -323,10 +346,14 @@ const Posts = () => {
                 <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-primary">
                     <div className="d-flex align-items-center">
                         <img 
-                            src={user.picture} 
+                            src={getImageUrl(user.picture)}
                             alt={user.name}
                             className="rounded-circle me-2"
-                            style={{ width: '50px', height: '50px' }}
+                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                            onError={(e) => {
+                                console.error('❌ Error cargando imagen del usuario:', user.picture);
+                                e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=0D8ABC&color=fff&size=50';
+                            }}
                         />
                         <div>
                             <div className="fw-bold">{user.name}</div>
@@ -356,10 +383,13 @@ const Posts = () => {
                                 </label>
                                 <div className="d-flex align-items-center p-3 bg-light rounded">
                                     <img 
-                                        src={user.picture} 
+                                        src={getImageUrl(user.picture)}
                                         alt={user.name}
                                         className="rounded-circle me-2"
-                                        style={{ width: '40px', height: '40px' }}
+                                        style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                                        onError={(e) => {
+                                            e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=0D8ABC&color=fff&size=40';
+                                        }}
                                     />
                                     <div>
                                         <div className="fw-bold text-primary">{user.name}</div>

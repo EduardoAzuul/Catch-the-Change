@@ -16,6 +16,30 @@ const Post = mongoose.model('Post', postSchema);
 
 console.log('📝 Post model loaded successfully');
 
+// ==================== HELPER FUNCTION ====================
+
+// Función para obtener la foto de perfil actual del usuario
+async function getUserCurrentPicture(userId) {
+    try {
+        // Obtener el modelo User de forma dinámica (debe estar ya registrado en server.js)
+        const User = mongoose.models.User || mongoose.model('User');
+        
+        const user = await User.findById(userId);
+        if (!user) {
+            console.log(`⚠️ User not found: ${userId}`);
+            return null;
+        }
+        
+        // Priorizar customPicture sobre picture
+        const picture = user.customPicture || user.picture;
+        console.log(`📸 User ${userId} picture:`, picture);
+        return picture;
+    } catch (error) {
+        console.error('❌ Error fetching user picture:', error);
+        return null;
+    }
+}
+
 // ==================== ROUTES ====================
 
 // GET - Get all posts
@@ -37,19 +61,24 @@ router.get('/', async (req, res) => {
             });
         }
 
-        const formattedPosts = posts.map(post => ({
-            id: post._id.toString(),
-            author: post.author,
-            authorEmail: post.authorEmail,
-            authorPicture: post.authorPicture,
-            text: post.text,
-            userId: post.userId,
-            date: new Date(post.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric', month: 'long', day: 'numeric',
-                hour: '2-digit', minute: '2-digit'
-            }),
-            createdAt: post.createdAt,
-            updatedAt: post.updatedAt
+        // Actualizar fotos de perfil de los autores
+        const formattedPosts = await Promise.all(posts.map(async (post) => {
+            const currentPicture = await getUserCurrentPicture(post.userId);
+            
+            return {
+                id: post._id.toString(),
+                author: post.author,
+                authorEmail: post.authorEmail,
+                authorPicture: currentPicture || post.authorPicture, // Usar foto actual o la guardada
+                text: post.text,
+                userId: post.userId,
+                date: new Date(post.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                }),
+                createdAt: post.createdAt,
+                updatedAt: post.updatedAt
+            };
         }));
 
         console.log(`📤 Sending ${formattedPosts.length} formatted posts to frontend`);
@@ -70,11 +99,14 @@ router.get('/user/:userId', async (req, res) => {
         const posts = await Post.find({ userId }).sort({ createdAt: -1 });
         console.log(`✅ User ${userId} posts fetched: ${posts.length} documents`);
 
+        // Obtener foto actual del usuario
+        const currentPicture = await getUserCurrentPicture(userId);
+
         const formattedPosts = posts.map(post => ({
             id: post._id.toString(),
             author: post.author,
             authorEmail: post.authorEmail,
-            authorPicture: post.authorPicture,
+            authorPicture: currentPicture || post.authorPicture,
             text: post.text,
             userId: post.userId,
             date: new Date(post.createdAt).toLocaleDateString('en-US', {
@@ -107,10 +139,10 @@ router.post('/', async (req, res) => {
 
         const { author, authorEmail, authorPicture, text, userId } = req.body;
 
-        if (!author || !authorEmail || !authorPicture || !text || !userId) {
+        if (!author || !authorEmail || !text || !userId) {
             console.log('❌ Missing required fields', { 
                 author: !!author, authorEmail: !!authorEmail, 
-                authorPicture: !!authorPicture, text: !!text, userId: !!userId 
+                text: !!text, userId: !!userId 
             });
             return res.status(400).json({ error: 'Missing required fields' });
         }
@@ -122,10 +154,16 @@ router.post('/', async (req, res) => {
 
         console.log('✅ Data validation passed');
 
+        // Obtener la foto actual del usuario
+        const currentPicture = await getUserCurrentPicture(userId);
+        const pictureToUse = currentPicture || authorPicture || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(author);
+
+        console.log('📸 Using picture:', pictureToUse);
+
         const newPost = new Post({
             author: author.trim(),
             authorEmail: authorEmail.trim(),
-            authorPicture,
+            authorPicture: pictureToUse,
             text: text.trim(),
             userId
         });
@@ -202,11 +240,14 @@ router.put('/:id', async (req, res) => {
         await post.save();
         console.log('✅ Post updated', { oldTextPreview: oldText.substring(0, 30) + '...', newTextPreview: post.text.substring(0, 30) + '...' });
 
+        // Obtener foto actual del usuario
+        const currentPicture = await getUserCurrentPicture(post.userId);
+
         const formattedPost = {
             id: post._id.toString(),
             author: post.author,
             authorEmail: post.authorEmail,
-            authorPicture: post.authorPicture,
+            authorPicture: currentPicture || post.authorPicture,
             text: post.text,
             userId: post.userId,
             date: new Date(post.createdAt).toLocaleDateString('en-US', {
