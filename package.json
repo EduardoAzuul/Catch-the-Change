@@ -13,7 +13,7 @@
     "install-server": "cd server && npm install",
     "build-client": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
     "build": "npm run install-all && cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
-    "start": "node server/server.js",
+    "start": "react-scripts start && node server/server.js",
     "start-dev": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
     "start:backend": "node ./server/server.js",
     "start:frontend": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
