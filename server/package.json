@@ -5,6 +5,8 @@
   "dev": "nodemon server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "install-server": "npm install",
+    "build": "npm run install-server",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
