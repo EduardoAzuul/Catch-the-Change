@@ -12,7 +12,8 @@
     "install-server": "cd server && npm install",
     "build-client": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
     "build": "npm run install-client && react-scripts build",
-    "start": "react-scripts start"
+    "start": "react-scripts start",
+    "postinstall": "npm install -g serve"
   },
   "repository": {
     "type": "git",
@@ -34,7 +35,6 @@
     "leaflet": "^1.9.4",
     "mongoose": "^8.19.1",
     "multer": "^2.0.2",
-    "serve":"^14.2.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.6",
