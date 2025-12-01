@@ -85,7 +85,7 @@ export default function Login() {
             <link rel="preconnect" href="https://fonts.googleapis.com"></link>
             <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true"></link>
             <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Raleway:ital@0;1&family=Sacramento&display=swap" rel="stylesheet"></link>
-            <link rel="icon" href="images/logo.png" type="image/x-icon"></link>
+            <link rel="icon" href="Images/logo.png" type="image/x-icon"></link>
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
             <Header />
@@ -95,7 +95,7 @@ export default function Login() {
 
                     <div className="text-center mb-3">
                         <img 
-                            src="/images/logo.png" 
+                            src="Images/logo.png" 
                             alt="Logo" 
                             style={{ width: "100px", height: "100px", objectFit: "contain" }} 
                         />
