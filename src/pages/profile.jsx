@@ -17,6 +17,9 @@ export default function Profile() {
     const [success, setSuccess] = useState('');
     const fileInputRef = useRef(null);
 
+    const API_URL = process.env.REACT_APP_API_URL ||"http://localhost:4000/api";
+    const url = API_URL.replace(/\/$/, '');
+
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
         if (!storedUser) {
@@ -53,7 +56,7 @@ export default function Profile() {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:4000/api/user/profile/name', {
+            const response = await fetch(`${url}/user/profile/name`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -107,7 +110,7 @@ export default function Profile() {
             const formData = new FormData();
             formData.append('picture', file);
 
-            const response = await fetch('http://localhost:4000/api/user/profile/picture', {
+            const response = await fetch(`${url}/user/profile/picture`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -156,7 +159,7 @@ export default function Profile() {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:4000/api/user/profile/picture', {
+            const response = await fetch(`${url}/user/profile/picture`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -219,7 +222,7 @@ export default function Profile() {
         }
         
         // Si es una ruta relativa, agregar el servidor
-        return `http://localhost:4000${picturePath}`;
+        return `${url/picturePath}`;
     };
 
     return (
