@@ -7,16 +7,16 @@ import { OAuth2Client } from "google-auth-library";
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// POST /api/auth/google
+// Verifies that the user has a google account and mantains the session logged in. Also, it searchs for the user in our database
 router.post("/google", async (req, res) => {
     try {
         const { credential } = req.body;
 
         if (!credential) {
-            return res.status(400).json({ error: "Falta credential" });
+            return res.status(400).json({ error: "Missing credential" });
         }
 
-        // Verificar el token de Google
+        
         const ticket = await client.verifyIdToken({
             idToken: credential,
             audience: process.env.GOOGLE_CLIENT_ID
@@ -26,7 +26,7 @@ router.post("/google", async (req, res) => {
 
         let user = await User.findOne({ googleId: payload.sub });
 
-        // Crear usuario si no existe
+        
         if (!user) {
             user = await User.create({
                 googleId: payload.sub,
@@ -36,7 +36,7 @@ router.post("/google", async (req, res) => {
             });
         }
 
-        // Generar token JWT
+    
         const token = jwt.sign(
             { id: user._id },
             process.env.JWT_SECRET,

@@ -1,3 +1,5 @@
+//Modal that says to the user that the message from the contact form has been sent
+
 const formModal = ({ isOpen, onClose, children }) => {
     if (!isOpen) return null;
 

@@ -1,3 +1,5 @@
+//Follows the mouse for the 3D effect in landing page
+
 document.addEventListener('mousemove', (e) => {
     Object.assign(document.documentElement, {
         style: `

@@ -13,15 +13,15 @@ export default function Login() {
 
     const from = location.state?.from?.pathname || '/profile';
 
-    // Si ya está autenticado, redirigir
+    //When the user is autheticated, is sent to the profile info
     useEffect(() => {
         if (user) {
             navigate(from, { replace: true });
         }
     }, [user, navigate, from]);
 
+    //loads google script to create the google log in button
     useEffect(() => {
-        // Cargar el script de Google
         const script = document.createElement("script");
         script.src = "https://accounts.google.com/gsi/client?hl=en";
         script.async = true;
@@ -47,6 +47,7 @@ export default function Login() {
         };
     }, []);
 
+    //Receives token from Google and sends it to the backend to be verified, then the profile info is gotten and saved into a JSON file
     const handleGoogleResponse = async (response) => {
         try {
             const res = await fetch(`${API_URL}/auth/google`, {
@@ -76,6 +77,7 @@ export default function Login() {
         }
     };
 
+    //The previous info is showed
     return (
         <React.Fragment>
             <meta charSet="UTF-8" />

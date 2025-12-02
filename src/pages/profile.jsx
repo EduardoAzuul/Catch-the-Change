@@ -20,6 +20,7 @@ export default function Profile() {
     const API_URL = process.env.REACT_APP_API_URL ||"http://localhost:4000/api";
     const url = API_URL.replace(/\/$/, '');
 
+    //verify is there is an user
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
         if (!storedUser) {
@@ -28,32 +29,32 @@ export default function Profile() {
         }
         setUser(JSON.parse(storedUser));
     }, [navigate]);
-
+//if not logs out, erase data from localstorage and redirects the user to landing page
     const handleLogout = () => {
         localStorage.removeItem("user");
         localStorage.removeItem("token");
         navigate("/");
     };
-
+    //sets edition an, loads actual name and erase messages
     const handleNameEdit = () => {
         setNewName(user.name);
         setIsEditingName(true);
         setError('');
         setSuccess('');
     };
-
+    //cancels edition and erase messages
     const handleNameCancel = () => {
         setIsEditingName(false);
         setNewName('');
         setError('');
     };
-
+    //verifies that the name is not empty before saving
     const handleNameSave = async () => {
         if (!newName.trim()) {
-            setError('Name cannot be empty');
+            setError('sName cannot be empty');
             return;
         }
-
+        //Saves new username
         try {
             const token = localStorage.getItem('token');
             const response = await fetch(`${url}/user/profile/name`, {
@@ -81,7 +82,7 @@ export default function Profile() {
             setError(err.message);
         }
     };
-
+//handles user interaction to change profile picture
     const handlePictureClick = () => {
         fileInputRef.current?.click();
     };
@@ -90,13 +91,11 @@ export default function Profile() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Validar tipo de archivo
         if (!file.type.startsWith('image/')) {
             setError('Please select an image file');
             return;
         }
 
-        // Validar tamaño (5MB)
         if (file.size > 5 * 1024 * 1024) {
             setError('Image size must be less than 5MB');
             return;
@@ -104,7 +103,7 @@ export default function Profile() {
 
         setIsUploading(true);
         setError('');
-
+//sends data to change profile picture
         try {
             const token = localStorage.getItem('token');
             const formData = new FormData();
@@ -118,7 +117,6 @@ export default function Profile() {
                 body: formData
             });
 
-            // Verificar el content-type de la respuesta
             const contentType = response.headers.get('content-type');
             console.log('Response content-type:', contentType);
             console.log('Response status:', response.status);
@@ -129,7 +127,6 @@ export default function Profile() {
                 throw new Error('Failed to upload picture. Check console for details.');
             }
 
-            // Verificar que la respuesta sea JSON
             if (!contentType || !contentType.includes('application/json')) {
                 const text = await response.text();
                 console.error('Expected JSON but got:', text);
@@ -148,7 +145,7 @@ export default function Profile() {
             setIsUploading(false);
         }
     };
-
+//allows user to delete the pp
     const handlePictureDelete = async () => {
         if (!window.confirm('Are you sure you want to remove your custom profile picture? It will revert to your Google profile picture.')) {
             return;
@@ -183,7 +180,7 @@ export default function Profile() {
             setIsUploading(false);
         }
     };
-
+//Shows loading is there is not an user yet
     if (!user) {
         return (
             <React.Fragment>
@@ -205,14 +202,12 @@ export default function Profile() {
             </React.Fragment>
         );
     }
-
-    // Verificar si tiene foto personalizada
+//sets profile photo
     const hasCustomPicture = user.picture && (
         user.picture.includes('/uploads/profiles/') || 
         (user.picture.includes('/images/') && !user.picture.includes('googleusercontent'))
     );
 
-    // Construir URL completa de la imagen
     const getImageUrl = (picturePath) => {
         if (!picturePath) return 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=0D8ABC&color=fff&size=150';
         
@@ -221,7 +216,6 @@ export default function Profile() {
             return picturePath;
         }
         
-        // Si es una ruta relativa, agregar el servidor
         return `${url/picturePath}`;
     };
 
@@ -242,7 +236,6 @@ export default function Profile() {
             <div className="container d-flex justify-content-center align-items-center min-vh-100 py-5">
                 <div className="card shadow-lg p-4 profile-card text-center" style={{ maxWidth: '500px', width: '100%' }}>
                     
-                    {/* Mensajes de error y éxito */}
                     {error && (
                         <div className="alert alert-danger alert-dismissible fade show" role="alert">
                             {error}
@@ -266,7 +259,6 @@ export default function Profile() {
                         </div>
                     )}
 
-                    {/* Foto de perfil */}
                     <div className="d-flex justify-content-center position-relative mb-3">
                         <div className="position-relative">
                             <img
@@ -319,7 +311,6 @@ export default function Profile() {
                         />
                     </div>
 
-                    {/* Botón para eliminar foto personalizada */}
                     {hasCustomPicture && (
                         <button
                             className="btn btn-sm btn-outline-danger mb-3"
@@ -330,7 +321,6 @@ export default function Profile() {
                         </button>
                     )}
 
-                    {/* Nombre del usuario */}
                     {!isEditingName ? (
                         <div className="mt-2">
                             <h1 className="fw-bold d-inline-block me-2 mb-0">{user.name}</h1>

@@ -1,3 +1,5 @@
+//landing page
+
 import { Link } from 'react-router-dom';
 import "../css/main.css";
 import "../js/app.js";

@@ -2,15 +2,13 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:4000/api";
 
 export default async function contactUS(data) {
     try {
-        console.log('📤 Enviando mensaje de contacto...');
         console.log('Datos:', { 
             name: data.name, 
             email: data.email, 
             messageLength: data.message?.length 
         });
 
-        // 1. Enviar email con EmailJS
-        console.log('📧 Enviando email...');
+        //the message from contact form is sent by email.js
         const service_id = process.env.REACT_APP_EMAILJS_SERVICE_ID;
         const user_id = process.env.REACT_APP_EMAILJS_USER_ID;
         const template_id = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
@@ -34,13 +32,11 @@ export default async function contactUS(data) {
         });
 
         if (!emailres.ok) {
-            console.warn('⚠️ Error al enviar email, pero continuando...');
         } else {
-            console.log('✅ Email enviado exitosamente');
+            console.log('Email was sent successfully');
         }
 
-        // 2. Guardar en MongoDB
-        console.log('💾 Guardando en base de datos...');
+        //The mail is saved in database
         const url = API_URL.replace(/\/$/, '');
         const res = await fetch(`${url}/contactUs`, {
             method: "POST",
@@ -54,16 +50,16 @@ export default async function contactUS(data) {
 
         if (!res.ok) {
             const errorData = await res.json();
-            throw new Error(errorData.error || 'Error al guardar el mensaje');
+            throw new Error(errorData.error || 'Message was not saved');
         }
 
         const result = await res.json();
-        console.log('message in MongoDB:', result.id);
+        console.log('Message in database:', result.id);
         
         return {
             success: true,
             data: result,
-            message: 'Mensaje enviado exitosamente'
+            message: 'Message was sent'
         };
 
     } catch (error) {

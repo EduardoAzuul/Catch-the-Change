@@ -1,4 +1,3 @@
-// server/api/profile.js
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -7,7 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Configuración de multer para subir imágenes
+// Saves the profile photo that user uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const uploadDir = path.join(__dirname, '../public/uploads/profiles');
@@ -22,9 +21,10 @@ const storage = multer.diskStorage({
     }
 });
 
+//Manage the way in which the images that the user uploads will be saved 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB límite
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: function (req, file, cb) {
         const filetypes = /jpeg|jpg|png|gif/;
         const mimetype = filetypes.test(file.mimetype);
@@ -33,11 +33,11 @@ const upload = multer({
         if (mimetype && extname) {
         return cb(null, true);
         }
-        cb(new Error('Solo se permiten imágenes (jpeg, jpg, png, gif)'));
+        cb(new Error('Type files allowed: jpeg, jpg, png, gif)'));
     }
 });
 
-// Middleware para verificar token
+// Verifies that the user is still allow to manipulate data
 const verifyToken = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
     
@@ -54,7 +54,7 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-// GET - Obtener perfil del usuario
+// Get user profile
 router.get('/', verifyToken, async (req, res) => {
     try {
         const db = req.app.get('db');
@@ -71,7 +71,7 @@ router.get('/', verifyToken, async (req, res) => {
     }
 });
 
-// PUT - Actualizar nombre del usuario
+// Allows to change the name of the profile
 router.put('/name', verifyToken, async (req, res) => {
     const { name } = req.body;
     
@@ -95,7 +95,7 @@ router.put('/name', verifyToken, async (req, res) => {
     }
 });
 
-// PUT - Actualizar foto de perfil
+// Allows to change profile picture
 router.put('/picture', verifyToken, upload.single('picture'), async (req, res) => {
     try {
         if (!req.file) {
@@ -104,10 +104,8 @@ router.put('/picture', verifyToken, upload.single('picture'), async (req, res) =
         
         const db = req.app.get('db');
         
-        // Obtener la foto anterior para eliminarla
         const user = await db.get('SELECT picture FROM users WHERE id = ?', [req.userId]);
-        
-        // Eliminar foto anterior si existe y no es la default
+  
         if (user.picture && !user.picture.includes('default-avatar.png')) {
         const oldPicturePath = path.join(__dirname, '../public', user.picture.replace(/^\//, ''));
         if (fs.existsSync(oldPicturePath)) {
@@ -115,7 +113,7 @@ router.put('/picture', verifyToken, upload.single('picture'), async (req, res) =
         }
         }
         
-        // Guardar nueva foto
+        // Saves new picture
         const pictureUrl = `/uploads/profiles/${req.file.filename}`;
         await db.run('UPDATE users SET picture = ? WHERE id = ?', [pictureUrl, req.userId]);
         
@@ -127,15 +125,13 @@ router.put('/picture', verifyToken, upload.single('picture'), async (req, res) =
     }
 });
 
-// DELETE - Eliminar foto de perfil (volver a default)
+// Erase profile picture and replace it for the one in google
 router.delete('/picture', verifyToken, async (req, res) => {
     try {
         const db = req.app.get('db');
         
-        // Obtener la foto actual
         const user = await db.get('SELECT picture FROM users WHERE id = ?', [req.userId]);
         
-        // Eliminar foto si existe y no es la default
         if (user.picture && !user.picture.includes('default-avatar.png')) {
         const picturePath = path.join(__dirname, '../public', user.picture.replace(/^\//, ''));
         if (fs.existsSync(picturePath)) {
@@ -143,7 +139,6 @@ router.delete('/picture', verifyToken, async (req, res) => {
         }
         }
         
-        // Restaurar a foto default
         const defaultPicture = '/images/default-avatar.png';
         await db.run('UPDATE users SET picture = ? WHERE id = ?', [defaultPicture, req.userId]);
         

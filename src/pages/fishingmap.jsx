@@ -16,7 +16,7 @@ export default function FishingMap() {
             attribution: '© OpenStreetMap'
         }).addTo(leafletInstance.current);
 
-        // Fetch MongoDB marker data
+        //Creates the layer for economic zone in the map
         const fetcheconomicZoneLayer = async () => {
             try {
                 const res = await fetch(`${url}/economicZoneLayer`);
@@ -46,6 +46,7 @@ export default function FishingMap() {
             }
         };
 
+        //Creates the layer for protectedAreas1 in the map
         const fetchprotectedAreas1Layer = async () => {
             try {
                 const res = await fetch(`${url}/protectedAreas1Layer`);
@@ -75,6 +76,7 @@ export default function FishingMap() {
             }
         };
 
+        //Creates the layer for protectedAreas2 in the map
         const fetchprotectedAreas2Layer = async () => {
             try {
                 const res = await fetch(`${url}/protectedAreas2Layer`);

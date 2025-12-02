@@ -2,13 +2,14 @@ const express = require("express");
 const router = express.Router();
 const ContactUsModel = require("../models/contactUs");
 
-console.log('📧 Modelo ContactUs cargado correctamente');
+console.log('ContactUS loaded correctly');
 
-// POST - Crear nuevo mensaje de contacto
+// POST - Takes the info of the contact forms fields and verifies that they are not empty
+//Then saves it in our database
 router.post("/", async (req, res) => {
     try {
-        console.log('📥 Petición POST /api/contactUs - Nuevo mensaje de contacto');
-        console.log('📦 Datos recibidos:', {
+        console.log('New message from contact form');
+        console.log('Received data:', {
             name: req.body.name,
             email: req.body.email,
             messageLength: req.body.message?.length
@@ -16,21 +17,20 @@ router.post("/", async (req, res) => {
 
         const { name, email, message } = req.body;
 
-        // Validación
         if (!name || !email || !message) {
-            console.log('❌ Faltan campos requeridos');
+            console.log('Missing required fields');
             return res.status(400).json({ 
-                error: 'Todos los campos son requeridos',
+                error: 'Every fields are required',
                 received: { name: !!name, email: !!email, message: !!message }
             });
         }
 
         if (!email.includes('@')) {
-            console.log('❌ Email inválido:', email);
-            return res.status(400).json({ error: 'Email inválido' });
+            console.log('Invalid email:', email);
+            return res.status(400).json({ error: 'Invalid email' });
         }
 
-        console.log('✅ Validación completada');
+        console.log('Completed validation');
 
         const contactUsModel = new ContactUsModel({
             name: name.trim(),
@@ -38,12 +38,12 @@ router.post("/", async (req, res) => {
             message: message.trim()
         });
 
-        console.log('💾 Guardando mensaje en MongoDB...');
+        console.log('Saving message into database');
         const savedContact = await contactUsModel.save();
         
-        console.log('✅ Mensaje guardado exitosamente en MongoDB');
-        console.log('📄 ID del mensaje:', savedContact._id.toString());
-        console.log('📄 Detalles:', {
+        console.log('Message saved');
+        console.log('Message ID:', savedContact._id.toString());
+        console.log(' Details:', {
             id: savedContact._id,
             name: savedContact.name,
             email: savedContact.email,
@@ -51,12 +51,11 @@ router.post("/", async (req, res) => {
             createdAt: savedContact.createdAt
         });
 
-        // Verificar que se guardó
         const verify = await ContactUsModel.findById(savedContact._id);
         if (verify) {
-            console.log('✅ Verificación: Mensaje encontrado en MongoDB');
+            console.log('Message founded in database');
         } else {
-            console.log('⚠️ Advertencia: Mensaje no encontrado después de guardar');
+            console.log('Message was not saved correctly');
         }
 
         res.status(201).json({
@@ -67,32 +66,29 @@ router.post("/", async (req, res) => {
             createdAt: savedContact.createdAt
         });
 
-        console.log('📤 Respuesta enviada al frontend');
-        console.log('🎉 Mensaje de contacto procesado exitosamente');
+        console.log('MESSAGE SENT CORRECTLY');
 
     } catch (error) {
-        console.error('❌ Error al crear mensaje de contacto:', error);
+        console.error('Message was not created:', error);
         console.error('Stack trace:', error.stack);
         res.status(500).json({ 
-            error: "Error al guardar el mensaje de contacto",
+            error: "Error when saving message",
             details: error.message 
         });
     }
 });
 
-// GET - Obtener todos los mensajes de contacto
+// GET - Gets messages from database
 router.get("/", async (req, res) => {
     try {
-        console.log('📥 Petición GET /api/contactUs - Obteniendo todos los mensajes');
+        console.log('Obtaining all messages');
         
         const contacts = await ContactUsModel.find()
-            .sort({ createdAt: -1 }) // Más recientes primero
+            .sort({ createdAt: -1 })
             .lean();
         
-        console.log(`✅ Mensajes obtenidos de MongoDB: ${contacts.length} documentos`);
-        
         if (contacts.length > 0) {
-            console.log('📄 Primer mensaje:', {
+            console.log('First message:', {
                 id: contacts[0]._id,
                 name: contacts[0].name,
                 email: contacts[0].email,
@@ -101,32 +97,30 @@ router.get("/", async (req, res) => {
         }
 
         res.status(200).json(contacts);
-        console.log(`📤 Enviando ${contacts.length} mensajes al frontend`);
 
     } catch (error) {
-        console.error('❌ Error al obtener mensajes:', error);
+        console.error('Didnt get messages:', error);
         console.error('Stack trace:', error.stack);
         res.status(500).json({ 
-            error: "Error al obtener los mensajes de contacto",
+            error: "Didnt get messages",
             details: error.message 
         });
     }
 });
 
-// GET - Obtener un mensaje específico por ID
+// GET - Get specific messages by ID to send the mails
 router.get("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        console.log(`📥 Petición GET /api/contactUs/${id} - Obteniendo mensaje específico`);
 
         const contact = await ContactUsModel.findById(id).lean();
 
         if (!contact) {
-            console.log('❌ Mensaje no encontrado');
-            return res.status(404).json({ error: "Mensaje no encontrado" });
+            console.log('Message was not found');
+            return res.status(404).json({ error: "Messages was not found" });
         }
 
-        console.log('✅ Mensaje encontrado:', {
+        console.log('Founded message:', {
             id: contact._id,
             name: contact.name,
             email: contact.email
@@ -135,47 +129,39 @@ router.get("/:id", async (req, res) => {
         res.status(200).json(contact);
 
     } catch (error) {
-        console.error('❌ Error al obtener mensaje:', error);
+        console.error('Error getting message:', error);
         res.status(500).json({ 
-            error: "Error al obtener el mensaje",
+            error: "Error getting message",
             details: error.message 
         });
     }
 });
 
-// DELETE - Eliminar un mensaje (útil para administración)
+// DELETE - Delete a message from database
 router.delete("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        console.log(`📥 Petición DELETE /api/contactUs/${id} - Eliminando mensaje`);
 
         const deleted = await ContactUsModel.findByIdAndDelete(id);
 
         if (!deleted) {
-            console.log('❌ Mensaje no encontrado');
-            return res.status(404).json({ error: "Mensaje no encontrado" });
+            console.log('Message was not founded');
+            return res.status(404).json({ error: "Message was not founded" });
         }
 
-        console.log('✅ Mensaje eliminado exitosamente');
+        console.log('✅ Message deleted');
         res.status(200).json({ 
-            message: "Mensaje eliminado exitosamente",
+            message: "Message deleted",
             id: deleted._id 
         });
 
     } catch (error) {
-        console.error('❌ Error al eliminar mensaje:', error);
+        console.error('We werent able to delete the message', error);
         res.status(500).json({ 
-            error: "Error al eliminar el mensaje",
+            error: "We werent able to delete the message",
             details: error.message 
         });
     }
 });
-
-console.log('✅ Contact routes Loaded Successfully');
-console.log('📋 Rutas disponibles:');
-console.log('   POST   /api/contactUs');
-console.log('   GET    /api/contactUs');
-console.log('   GET    /api/contactUs/:id');
-console.log('   DELETE /api/contactUs/:id');
 
 module.exports = router;

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+//schema for users in database
 const userSchema = new mongoose.Schema({
     googleId: { type: String, required: true, unique: true },
     name: String,

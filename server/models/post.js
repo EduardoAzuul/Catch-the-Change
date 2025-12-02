@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+//schema for post content and its author info in database
 const postSchema = new mongoose.Schema({
     author: {
         type: String,
@@ -22,7 +22,7 @@ const postSchema = new mongoose.Schema({
         required: true
     }
 }, {
-    timestamps: true // Esto crea automáticamente createdAt y updatedAt
+    timestamps: true // Automatically creates createdAT and updatedAt
 });
 
 module.exports = mongoose.model('Post', postSchema);

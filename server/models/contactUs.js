@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+//schema for contact message in database
 const contactUsSchema = new mongoose.Schema({
     name: {
         type: String,

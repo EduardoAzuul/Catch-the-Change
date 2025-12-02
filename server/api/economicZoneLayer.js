@@ -3,6 +3,7 @@ import { mongoose } from "mongoose";
 const economiczoneSchema = new mongoose.Schema({});
 const economiczone = mongoose.model('economiczone', economiczoneSchema);
 
+//getting data about economic zone from database
 export async function getEconomicZone(req, res) {
   try {
 

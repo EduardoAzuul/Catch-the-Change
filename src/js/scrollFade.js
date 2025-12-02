@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import '../css/stylemain.css';
 
+//when scrolling identified, the hero fades away little by little and navbar changes style.
 export default function scrollFade() {
   useEffect(() => {
     const hero = document.querySelector(".hero");

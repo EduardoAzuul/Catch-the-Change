@@ -15,11 +15,11 @@ const { getProtectedAreas2 } = require("./api/protectedAreas2Layer");
 const postsRoutes = require("./api/posts");
 const contactUsRoutes = require("./api/contactUs");
 
+//server port
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// ==================== MULTER CONFIGURATION ====================
-
+//defines uploads for the multer: where images are uploaded
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const uploadDir = path.join(__dirname, "public/uploads/profiles");
@@ -36,7 +36,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: function (req, file, cb) {
         const filetypes = /jpeg|jpg|png|gif|webp/;
         const mimetype = filetypes.test(file.mimetype);
@@ -47,16 +47,14 @@ const upload = multer({
         if (mimetype && extname) {
             return cb(null, true);
         }
-        cb(new Error("Solo se permiten imágenes (jpeg, jpg, png, gif, webp)"));
+        cb(new Error("File images allowed: jpeg, jpg, png, gif, webp)"));
     },
 });
 
-// ==================== GOOGLE OAUTH VALIDATOR ====================
-
+//google OAuth client
 const googleClient = new OAuth2Client(process.env.MY_ID_GOOGLE);
 
-// ==================== CORS ====================
-
+//cors and logging requests
 app.use(
     cors({
         origin: "*",
@@ -66,32 +64,31 @@ app.use(
 );
 
 app.use((req, res, next) => {
-    console.log(`➡️  Request: ${req.method} ${req.url}`);
+    console.log(`Request: ${req.method} ${req.url}`);
     next();
 });
 
 app.use(express.json());
 
-// Servir archivos estáticos (para fotos de perfil)
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use(express.static(path.join(__dirname, "public")));
 
-// ==================== MONGODB MODELS ====================
+console.log("Loading MongoDB models...");
 
-console.log("🧪 Cargando modelos de MongoDB...");
-
+//user Schema for database
 const userSchema = new mongoose.Schema({
     googleId: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     picture: { type: String, default: "/images/default-avatar.png" },
-    customPicture: { type: String }, // Para fotos subidas por el usuario
+    customPicture: { type: String },
     createdAt: { type: Date, default: Date.now },
     lastLogin: { type: Date, default: Date.now },
 });
 const User = mongoose.model("User", userSchema);
 
+//Schema for comments
 const commentSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     texto: { type: String, required: true },
@@ -99,8 +96,6 @@ const commentSchema = new mongoose.Schema({
     editedAt: Date,
 });
 const Comment = mongoose.model("Comment", commentSchema);
-
-// ==================== JWT AUTH MIDDLEWARE ====================
 
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers["authorization"];
@@ -117,8 +112,7 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// ==================== GOOGLE AUTH ====================
-
+//Receives token from Google, verifies it and search for the user in MongoDB
 app.post("/api/auth/google", async (req, res) => {
     try {
         const { credential } = req.body;
@@ -132,20 +126,19 @@ app.post("/api/auth/google", async (req, res) => {
         const { sub, email, name, picture } = payload;
 
         let user = await User.findOne({ googleId: sub });
-
+        //updates info if the user exists
         if (user) {
             user.lastLogin = new Date();
-            // Solo actualizar picture de Google si no tiene foto personalizada
             if (!user.customPicture) {
                 user.picture = picture;
             }
             await user.save();
-        } else {
+        } else {//if not, creates the user
             user = await User.create({
                 googleId: sub,
                 email,
                 name,
-                picture, // Foto de Google por defecto
+                picture,
             });
         }
 
@@ -153,7 +146,6 @@ app.post("/api/auth/google", async (req, res) => {
             expiresIn: "7d",
         });
 
-        // Devolver customPicture si existe, sino picture de Google
         const profilePicture = user.customPicture || user.picture;
 
         res.json({
@@ -167,21 +159,20 @@ app.post("/api/auth/google", async (req, res) => {
             },
         });
     } catch (error) {
-        console.error("❌ Error en autenticación Google:", error);
+        console.error("Google Authentication error:", error);
         res.status(500).json({
-            error: "Error validando token Google",
+            error: "Google Authentication error",
             details: error.message,
         });
     }
 });
 
-// ==================== USER PROFILE ====================
-
+//gets user info
 app.get("/api/user/profile", authenticateToken, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId).select("-__v");
         if (!user)
-            return res.status(404).json({ error: "Usuario no encontrado" });
+            return res.status(404).json({ error: "User was not founded" });
 
         res.json({
             id: user._id,
@@ -192,13 +183,13 @@ app.get("/api/user/profile", authenticateToken, async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({
-            error: "Error en el servidor",
+            error: "Server error",
             details: error.message,
         });
     }
 });
 
-// PUT - Actualizar nombre
+//uploads profile username
 app.put("/api/user/profile/name", authenticateToken, async (req, res) => {
     try {
         const { name } = req.body;
@@ -213,7 +204,7 @@ app.put("/api/user/profile/name", authenticateToken, async (req, res) => {
 
         const user = await User.findById(req.user.userId);
         if (!user)
-            return res.status(404).json({ error: "Usuario no encontrado" });
+            return res.status(404).json({ error: "Usuario was not founded" });
 
         user.name = name.trim();
         await user.save();
@@ -227,61 +218,55 @@ app.put("/api/user/profile/name", authenticateToken, async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({
-            error: "Error en el servidor",
+            error: "Server error",
             details: error.message,
         });
     }
 });
-
-// PUT - Actualizar foto de perfil
+//updates picture
 app.put(
     "/api/user/profile/picture",
     authenticateToken,
     (req, res, next) => {
-        console.log('📸 Picture upload request received');
         console.log('User ID:', req.user.userId);
         next();
     },
     upload.single("picture"),
     async (req, res) => {
         try {
-            console.log('📸 File received:', req.file);
+            console.log('File received:', req.file);
             
             if (!req.file) {
-                console.error('❌ No file in request');
+                console.error('No file in request');
                 return res.status(400).json({ error: "No file uploaded" });
             }
 
             const user = await User.findById(req.user.userId);
             if (!user) {
-                console.error('❌ User not found:', req.user.userId);
-                return res.status(404).json({ error: "Usuario no encontrado" });
+                console.error('User not found:', req.user.userId);
+                return res.status(404).json({ error: "Usuario not found" });
             }
 
-            console.log('👤 Current user:', { id: user._id, email: user.email });
+            console.log('Current user:', { id: user._id, email: user.email });
 
-            // Eliminar foto anterior si existe
             if (user.customPicture) {
                 const oldPicturePath = path.join(
                     __dirname,
                     "public",
                     user.customPicture.replace(/^\//, "")
                 );
-                console.log('🗑️ Deleting old picture:', oldPicturePath);
                 if (fs.existsSync(oldPicturePath)) {
                     fs.unlinkSync(oldPicturePath);
-                    console.log('✅ Old picture deleted');
+                    console.log('Old picture deleted');
                 }
             }
 
-            // Guardar nueva foto
             const pictureUrl = `/uploads/profiles/${req.file.filename}`;
-            console.log('💾 Saving new picture URL:', pictureUrl);
             
             user.customPicture = pictureUrl;
             await user.save();
 
-            console.log('✅ Picture updated successfully');
+            console.log('Picture updated successfully');
 
             const responseData = {
                 id: user._id,
@@ -291,10 +276,10 @@ app.put(
                 picture: user.customPicture,
             };
 
-            console.log('📤 Sending response:', responseData);
+            console.log('Sending response:', responseData);
             res.json(responseData);
         } catch (error) {
-            console.error("❌ Error updating picture:", error);
+            console.error("Error updating picture:", error);
             res.status(500).json({
                 error: "Error updating picture",
                 details: error.message,
@@ -302,15 +287,13 @@ app.put(
         }
     }
 );
-
-// DELETE - Eliminar foto personalizada (volver a Google)
+//deletes profile picture
 app.delete("/api/user/profile/picture", authenticateToken, async (req, res) => {
     try {
         const user = await User.findById(req.user.userId);
         if (!user)
-            return res.status(404).json({ error: "Usuario no encontrado" });
+            return res.status(404).json({ error: "User not found" });
 
-        // Eliminar foto personalizada si existe
         if (user.customPicture) {
             const picturePath = path.join(
                 __dirname,
@@ -329,10 +312,10 @@ app.delete("/api/user/profile/picture", authenticateToken, async (req, res) => {
             googleId: user.googleId,
             name: user.name,
             email: user.email,
-            picture: user.picture, // Vuelve a la foto de Google
+            picture: user.picture,
         });
     } catch (error) {
-        console.error("❌ Error deleting picture:", error);
+        console.error("Error deleting picture:", error);
         res.status(500).json({
             error: "Error deleting picture",
             details: error.message,
@@ -340,8 +323,7 @@ app.delete("/api/user/profile/picture", authenticateToken, async (req, res) => {
     }
 });
 
-// ==================== OTHER ROUTES ====================
-
+//Other APIs for the maps, contactUs and posts
 app.get("/api/markers", getMarkers);
 app.get("/api/economicZoneLayer", getEconomicZone);
 app.get("/api/protectedAreas1Layer", getProtectedAreas1);
@@ -349,18 +331,16 @@ app.get("/api/protectedAreas2Layer", getProtectedAreas2);
 app.use("/api/posts", postsRoutes);
 app.use("/api/contactUs", contactUsRoutes);
 
-// ==================== ERROR HANDLING ====================
-
-// Manejo de errores de Multer
+//error handling multer
 app.use((err, req, res, next) => {
     if (err instanceof multer.MulterError) {
-        console.error('❌ Multer error:', err);
+        console.error('Multer error:', err);
         return res.status(400).json({
             error: 'File upload error',
             details: err.message
         });
     } else if (err) {
-        console.error('❌ Server error:', err);
+        console.error('Server error:', err);
         return res.status(500).json({
             error: 'Server error',
             details: err.message
@@ -369,21 +349,20 @@ app.use((err, req, res, next) => {
     next();
 });
 
-// ==================== START SERVER ====================
-
-console.log("⏳ Conectando a MongoDB Atlas...");
+//MongoDB connection
+console.log("Connecting to MongoDB Atlas...");
 
 mongoose
     .connect(process.env.MONGODB_URI)
     .then(() => {
-        console.log("✅ MongoDB Atlas conectado correctamente");
+        console.log("MongoDB Atlas connected");
 
         app.listen(PORT, () => {
-            console.log(`🚀 Server ejecutándose en http://localhost:${PORT}`);
+            console.log(`Server in http://localhost:${PORT}`);
         });
     })
     .catch((err) => {
-        console.error("❌ Error conectando a MongoDB Atlas:");
+        console.error("MongoDB Atlas was not connected:");
         console.error(err);
         process.exit(1);
     });

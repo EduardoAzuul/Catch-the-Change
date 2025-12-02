@@ -7,26 +7,25 @@ import Footer from '../components/footer.jsx';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/post.css'; 
+import scrollFade from '../js/scrollFade.js';
 
 const API_URL = process.env.REACT_APP_API_URL ||"http://localhost:4000/api";
 
-// Función helper para construir URLs de imágenes
+// If the user doesn't have profile photo, a default image is assigned
 const getImageUrl = (picturePath) => {
     if (!picturePath) {
         return 'https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff&size=150';
     }
-    
-    // Si es una URL completa (de Google), devolverla tal cual
+ 
     if (picturePath.startsWith('http://') || picturePath.startsWith('https://')) {
         return picturePath;
     }
     
-    // Si es una ruta relativa, agregar el servidor
     return `http://localhost:4000${picturePath}`;
 };
 
-// --- COMPONENTE PRINCIPAL (Posts) ---
-const Posts = () => {
+const Posts = () => {//manages all posts frontend functionality
+    scrollFade();
     const { user } = useAuth();
     const navigate = useNavigate();
     
@@ -36,69 +35,65 @@ const Posts = () => {
     const [loading, setLoading] = useState(true);
 
     
-    
-    // Verificar que el usuario esté autenticado
+    //Verifies that the user is authenticated
     useEffect(() => {
         if (!user) {
             navigate('/login');
         }
     }, [user, navigate]);
 
-    // Cargar posts al montar el componente
+    // Loads posts for showing them
     useEffect(() => {
         if (user) {
             fetchPosts();
         }
     }, [user]);
 
-    // Si no hay usuario, no renderizar nada
+    // If the user is not logged in, the posts doesn't show
     if (!user) {
         return null;
     }
 
-    // Función para obtener todos los posts desde MongoDB
+    //Gets all the posts from database
     const fetchPosts = async () => {
         try {
-            console.log('🔄 Obteniendo posts desde el servidor...');
             setLoading(true);
             const response = await fetch(`${API_URL}/posts`);
             
             if (!response.ok) {
-                throw new Error('Error al cargar los posts');
+                throw new Error('Loading posts error');
             }
             
             const data = await response.json();
-            console.log('✅ Posts recibidos del servidor:', data.length);
-            console.log('📸 Primer post picture:', data[0]?.authorPicture);
-            console.log('📸 URL completa:', getImageUrl(data[0]?.authorPicture));
+            console.log('Posts received:', data.length);
             setPosts(data);
         } catch (err) {
-            console.error('❌ Error al obtener posts:', err);
-            setError('Error al cargar los posts');
+            console.error('Error getting posts:', err);
+            setError('Error loading posts');
         } finally {
             setLoading(false);
         }
     };
 
+    //Updates the content of the comment while user is typing
     const handleContentChange = (e) => {
         setContent(e.target.value);
         if (error) setError(null);
     };
 
-    // Crear nuevo post y guardarlo en MongoDB
+    // Creates a new post and saves it into our database
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!content.trim()) {
-            setError('Por favor, ingresa el contenido del post.');
+            setError('Please write the content of the post');
             return;
         }
 
         try {
-            console.log('📤 Enviando nuevo post al servidor...');
-            console.log('📸 User picture:', user.picture);
+            console.log('Sending new post to server...');
             
-            const response = await fetch(`${API_URL}/posts`, {
+            const response = await fetch(`${API_URL}/posts`, { //Creates post
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -108,45 +103,43 @@ const Posts = () => {
                     authorEmail: user.email,
                     authorPicture: user.picture,
                     text: content.trim(),
-                    userId: user.id || user.email // Usar user.id si existe
+                    userId: user.id || user.email
                 })
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Error al crear el post');
+                throw new Error(errorData.error || 'Error creating post');
             }
 
             const newPost = await response.json();
-            console.log('✅ Post creado exitosamente:', newPost.id);
-            console.log('📸 New post picture:', newPost.authorPicture);
+            console.log('Post was created successfully:', newPost.id);
             
             setPosts(prevPosts => [newPost, ...prevPosts]);
             setContent('');
             setError(null);
         } catch (err) {
-            console.error('❌ Error al crear post:', err);
-            setError(err.message || 'Error al publicar el post');
+            console.error('The post was not created:', err);
+            setError(err.message || 'The post was not posted');
         }
     };
 
-    // Componente para cada post individual
+// Creates the post component and manages edit permissions based on ownership
     const PostItem = ({ post }) => {
         const isOwner = post.authorEmail === user.email;
         const [isEditing, setIsEditing] = useState(false);
         const [editText, setEditText] = useState(post.text);
         const [editError, setEditError] = useState(null);
 
-        // Actualizar post en MongoDB
+        // Uploads post in database
         const handleSave = async () => {
             if (!editText.trim()) {
-                setEditError('El contenido del post no puede estar vacío.');
+                setEditError('Post cannot be empty.');
                 return;
             }
             
             try {
-                console.log('📤 Actualizando post en el servidor...');
-                const response = await fetch(`${API_URL}/posts/${post.id}`, {
+                const response = await fetch(`${API_URL}/posts/${post.id}`, {//Updates content in server
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -159,11 +152,11 @@ const Posts = () => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || 'Error al actualizar el post');
+                    throw new Error(errorData.error || 'Update error');
                 }
 
                 const updatedPost = await response.json();
-                console.log('✅ Post actualizado exitosamente:', updatedPost.id);
+                console.log('Post was updated correctly:', updatedPost.id);
                 
                 setPosts(prevPosts => 
                     prevPosts.map(p => 
@@ -174,20 +167,19 @@ const Posts = () => {
                 setIsEditing(false);
                 setEditError(null);
             } catch (err) {
-                console.error('❌ Error al actualizar post:', err);
-                setEditError(err.message || 'Error al actualizar el post');
+                console.error('Error updating:', err);
+                setEditError(err.message || 'Error updating');
             }
         };
 
         // Eliminar post de MongoDB
         const handleDelete = async () => {
-            if (!window.confirm('¿Estás seguro de que quieres eliminar este post?')) {
+            if (!window.confirm('¿Are you sure you want to delete this post?')) {
                 return;
             }
 
             try {
-                console.log('📤 Eliminando post del servidor...');
-                const response = await fetch(`${API_URL}/posts/${post.id}`, {
+                const response = await fetch(`${API_URL}/posts/${post.id}`, {//deletes post
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -199,14 +191,14 @@ const Posts = () => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || 'Error al eliminar el post');
+                    throw new Error(errorData.error || 'Post want deleted correctly');
                 }
 
-                console.log('✅ Post eliminado exitosamente:', post.id);
+                console.log('Post was deleted with success:', post.id);
                 setPosts(prevPosts => prevPosts.filter(p => p.id !== post.id));
             } catch (err) {
-                console.error('❌ Error al eliminar post:', err);
-                alert(err.message || 'Error al eliminar el post');
+                console.error('Error deleting post', err);
+                alert(err.message || 'Cannot delete post');
             }
         };
 
@@ -227,7 +219,7 @@ const Posts = () => {
                                 className="rounded-circle me-2"
                                 style={{ width: '40px', height: '40px', objectFit: 'cover' }}
                                 onError={(e) => {
-                                    console.error('❌ Error cargando imagen del post:', post.authorPicture);
+                                    console.error('The image couldnt be loaded:', post.authorPicture);
                                     e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(post.author) + '&background=0D8ABC&color=fff&size=40';
                                 }}
                             />
@@ -271,7 +263,7 @@ const Posts = () => {
                                         onClick={handleSave}
                                         className="btn btn-success btn-sm"
                                     >
-                                        <i className="fas fa-check me-1"></i> Guardar
+                                        <i className="fas fa-check me-1"></i> Save
                                     </button>
                                     <button
                                         onClick={() => { 
@@ -281,7 +273,7 @@ const Posts = () => {
                                         }}
                                         className="btn btn-secondary btn-sm"
                                     >
-                                        <i className="fas fa-times me-1"></i> Cancelar
+                                        <i className="fas fa-times me-1"></i> Cancel
                                     </button>
                                 </>
                             ) : (
@@ -307,14 +299,14 @@ const Posts = () => {
         );
     };
 
-    // Mostrar loading mientras carga
+    // Show loading message
     if (loading) {
         return (
             <div className="bg-light min-vh-100">
                 <Header />
                 <div className="d-flex justify-content-center align-items-center" style={{ height: '80vh' }}>
                     <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
-                        <span className="visually-hidden">Cargando...</span>
+                        <span className="visually-hidden">Loading...</span>
                     </div>
                 </div>
                 <Footer />
@@ -351,7 +343,6 @@ const Posts = () => {
                             className="rounded-circle me-2"
                             style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                             onError={(e) => {
-                                console.error('❌ Error cargando imagen del usuario:', user.picture);
                                 e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=0D8ABC&color=fff&size=50';
                             }}
                         />
@@ -362,7 +353,6 @@ const Posts = () => {
                     </div>
                 </div>
 
-                {/* Formulario de Nueva Publicación */}
                 <section id="form-section" className="card shadow-lg mb-5 border-top border-5 border-primary">
                     <div className="card-body p-4 p-md-5">
                         <h2 className="card-title h4 text-secondary mb-4">

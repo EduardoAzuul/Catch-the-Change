@@ -1,5 +1,5 @@
 import '../css/stylemain.css'
-
+//Default header for every section
 const Footer = () => {
     return (
 

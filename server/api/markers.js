@@ -3,6 +3,7 @@ import { mongoose } from "mongoose";
 const endageredSchema = new mongoose.Schema({});
 const endagered = mongoose.model('iucnredmex', endageredSchema);
 
+//getting data about endangered species from database
 export async function getMarkers(req, res) {
   try {
 

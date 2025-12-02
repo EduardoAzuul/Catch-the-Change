@@ -3,6 +3,7 @@ import { mongoose } from "mongoose";
 const protectedareas1Schema = new mongoose.Schema({});
 const protectedareas1 = mongoose.model('protectedareas1', protectedareas1Schema);
 
+//gets protected areas from database
 export async function getProtectedAreas1(req, res) {
   try {
 

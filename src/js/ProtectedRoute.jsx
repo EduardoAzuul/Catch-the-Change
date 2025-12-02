@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
+//If the user logged in, shows the profile info and comunnity posts. if not, shows log in page.
 const ProtectedRoute = ({ children }) => {
     const { user, loading } = useAuth();
 
